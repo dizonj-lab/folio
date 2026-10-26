@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{TITLE}}</title>
+  <style>
+    :root { --bg: #f7f8fa; --card: #ffffff; --ink: #14171c; --muted: #5b6472; --line: #e3e6eb; --accent: #2a5d9f; }
+    @media (prefers-color-scheme: dark) {
+      :root { --bg: #0f1216; --card: #15191f; --ink: #e9ecf1; --muted: #aab3c0; --line: #262c35; --accent: #7fa9e2; }
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; }
+    main { max-width: 760px; margin: 0 auto; padding: 48px 16px; }
+    h1 { margin: 0 0 4px; font-size: 1.6rem; }
+    p.lead { margin: 0 0 28px; color: var(--muted); }
+    .grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .card { display: block; padding: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; color: inherit; text-decoration: none; }
+    .card:hover { border-color: var(--accent); }
+    .card strong { display: block; font-size: 1.1rem; color: var(--accent); }
+    .card span { display: block; margin-top: 4px; color: var(--muted); font-size: 0.92rem; }
+    footer { margin-top: 32px; color: var(--muted); font-size: 0.8rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{TITLE}}</h1>
+    <p class="lead">Architecture models, drawn with LikeC4 from the source in each repository.</p>
+    <div class="grid">{{LINKS}}</div>
+    <footer>Built {{STAMP}} · LikeC4 {{VERSION}}</footer>
+  </main>
+</body>
+</html>

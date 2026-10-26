@@ -1,0 +1,57 @@
+# Architecture site on the home server: the LikeC4 models of MealSenseAI and CEREBRO, built to a
+# static site and served by nginx on the LAN. Run ./setup.sh rather than this file directly.
+#
+#   http://<buddy>:8095/                 index
+#   http://<buddy>:8095/mealsenseai/     MealSenseAI model
+#   http://<buddy>:8095/cerebro/         CEREBRO model
+#
+# Not published through Cloudflare. Docker bypasses UFW for published ports, so the port is bound
+# to the LAN address only (ARCH_BIND), never 0.0.0.0, and is unreachable from outside the house.
+name: architecture
+
+x-hardening: &hardening
+  security_opt: ["no-new-privileges:true"]
+  pids_limit: 256
+  logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+services:
+  # One-off: `docker compose --profile build run --rm build`. Needs internet for npm.
+  build:
+    <<: *hardening
+    image: node:22-alpine
+    profiles: [build]
+    working_dir: /work
+    environment:
+      LIKEC4_VERSION: ${LIKEC4_VERSION:-1.60.0}
+      SITE_TITLE: ${SITE_TITLE:-Buddy architecture}
+    volumes:
+      - ./build.sh:/work/build.sh:ro
+      - ./index.template.html:/work/index.template.html:ro
+      - ${MEALSENSE_MODEL:-../../architecture/likec4}:/models/mealsenseai:ro
+      - ${CEREBRO_MODEL:-./empty}:/models/cerebro:ro
+      - site:/site
+      - npm-cache:/root/.npm
+    command: ["sh", "/work/build.sh"]
+
+  web:
+    <<: *hardening
+    image: nginx:1.27-alpine
+    cap_drop: [ALL]
+    cap_add: [CHOWN, SETUID, SETGID, NET_BIND_SERVICE]
+    read_only: true
+    tmpfs: [/var/cache/nginx, /var/run, /tmp]
+    ports: ["${ARCH_BIND:-127.0.0.1}:${ARCH_PORT:-8095}:80"]
+    volumes:
+      - site:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/healthz"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    restart: unless-stopped
+    mem_limit: 128m
+
+volumes:
+  site: {}
+  npm-cache: {}
