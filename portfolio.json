@@ -9,7 +9,7 @@
     "statement": "Making AI practical, personal, and meaningful in everyday life.",
     "about": [
       "Experienced technology architect passionate about AI and innovation. I design and build AI systems end to end — from the model and the data to the API, the interface and the server it runs on.",
-      "MealSenseAI was developed during my postgraduate studies in AI Systems at NUS, applying machine learning, computer vision and conversational AI. Both projects here are self-hosted on my own home server and run their models locally."
+      "MealSenseAI and CEREBRO were both developed as MVPs during my postgraduate studies in AI Systems at NUS — MealSenseAI applying machine learning, computer vision and conversational AI, CEREBRO knowledge representation and reasoning. Both projects here are self-hosted on my own home server and run their models locally."
     ],
     "links": [
       { "label": "LinkedIn", "href": "https://www.linkedin.com/in/joselito-dizon" },
@@ -58,7 +58,7 @@
       ],
       "stack": ["Knowledge graphs", "Next.js", "FastAPI", "PostgreSQL", "Kubernetes"],
       "status": "MVP",
-      "context": "Personal R&D",
+      "context": "NUS · AI Systems",
       "links": [
         { "label": "Source", "href": "https://github.com/dizonj-lab/cerebro" }
       ]
