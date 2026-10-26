@@ -1,11 +1,11 @@
-# Architecture site (LikeC4) on the home server
+# Portfolio and architecture site on the home server
 
-Serves the LikeC4 architecture models of **MealSenseAI** and **CEREBRO** as one static website on
-Buddy's home network:
+A professional portfolio page with the LikeC4 architecture models of **MealSenseAI** and
+**CEREBRO**, served as one static website on Buddy's home network:
 
 | URL | Contents |
 |---|---|
-| `http://192.168.1.25:8095/` | Index |
+| `http://192.168.1.25:8095/` | Portfolio: profile, projects with logos and descriptions, contact |
 | `http://192.168.1.25:8095/mealsenseai/` | MealSenseAI: landscape, capabilities, product rules, containers, backend components, Buddy, and three flows (photo to nutrition, glucose estimate, Meal Advisor) |
 | `http://192.168.1.25:8095/cerebro/` | CEREBRO: its 16 views, from `architecture/likec4` on the `cerebro-mvp` branch |
 
@@ -51,6 +51,21 @@ Tunnel. To reach it over Tailscale too, run once with `ARCH_BIND=<Buddy's Tailsc
 
 If you later want it on the internet, add a hostname to the existing tunnel and put it behind
 Cloudflare Access (email login); do not publish it without Access.
+
+## Edit the portfolio
+
+All the page's words live in `portfolio.json`; the layout is `index.template.html`. No HTML is
+needed to change content.
+
+- **Add a project:** append an entry to `projects` (`slug`, `name`, `tagline`, `description`, and
+  optionally `logo`, `logoTile`, `highlights`, `stack`, `status`, `context`, `links`). Without a
+  `logo` the card shows the project's initials.
+- **Logo:** put the file in `brand/` and set `"logo": "brand/<file>"`. Set `"logoTile": true` for a
+  mark drawn in dark ink, so it stays visible on the dark theme.
+- **Architecture link:** added automatically when a LikeC4 model named after the `slug` is built.
+  To add one, mount the model at `/models/<slug>` in `docker-compose.yml`.
+
+Then rerun `./infrastructure/architecture-site/setup.sh`.
 
 ## Edit the models
 

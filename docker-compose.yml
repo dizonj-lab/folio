@@ -1,7 +1,7 @@
 # Architecture site on the home server: the LikeC4 models of MealSenseAI and CEREBRO, built to a
 # static site and served by nginx on the LAN. Run ./setup.sh rather than this file directly.
 #
-#   http://<buddy>:8095/                 index
+#   http://<buddy>:8095/                 portfolio (content: portfolio.json)
 #   http://<buddy>:8095/mealsenseai/     MealSenseAI model
 #   http://<buddy>:8095/cerebro/         CEREBRO model
 #
@@ -23,10 +23,12 @@ services:
     working_dir: /work
     environment:
       LIKEC4_VERSION: ${LIKEC4_VERSION:-1.60.0}
-      SITE_TITLE: ${SITE_TITLE:-Buddy architecture}
     volumes:
       - ./build.sh:/work/build.sh:ro
       - ./index.template.html:/work/index.template.html:ro
+      - ./render.mjs:/work/render.mjs:ro
+      - ./portfolio.json:/work/portfolio.json:ro
+      - ./brand:/work/brand:ro
       - ${MEALSENSE_MODEL:-../../architecture/likec4}:/models/mealsenseai:ro
       - ${CEREBRO_MODEL:-./empty}:/models/cerebro:ro
       - site:/site

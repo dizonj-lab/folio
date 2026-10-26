@@ -1,12 +1,13 @@
 #!/bin/sh
-# Build each LikeC4 model mounted under /models/<name> into /site/<name>/, then write the index.
+# Build each LikeC4 model mounted under /models/<name> into /site/<name>/, then write the portfolio index.
 # Runs inside the node container (see docker-compose.yml). A model that is missing or invalid is
 # skipped with a message rather than failing the whole site.
 set -eu
 VERSION="${LIKEC4_VERSION:-1.60.0}"
 MODELS="${MODELS_DIR:-/models}"
 SITE="${SITE_DIR:-/site}"
-TEMPLATE="${TEMPLATE:-/work/index.template.html}"
+WORK="${WORK_DIR:-/work}"
+TEMPLATE="${TEMPLATE:-$WORK/index.template.html}"
 STAGE="${TMPDIR:-/tmp}/likec4-site"
 rm -rf "$STAGE" && mkdir -p "$STAGE"
 built=""
@@ -36,18 +37,9 @@ if [ -z "$built" ]; then
   exit 1
 fi
 
-links=""
-for name in $built; do
-  case "$name" in
-    mealsenseai) label="MealSenseAI"; desc="Photo-based meal logging with explainable nutrition and glucose estimates." ;;
-    cerebro) label="CEREBRO"; desc="Adaptive Knowledge and Reasoning Digital Twin: Learn, Connect, Reason, Recall." ;;
-    *) label="$name"; desc="" ;;
-  esac
-  links="$links<a class=\"card\" href=\"/$name/\"><strong>$label</strong><span>$desc</span></a>"
-done
-stamp="$(date -u '+%Y-%m-%d %H:%M UTC')"
-sed -e "s|{{TITLE}}|${SITE_TITLE:-Buddy architecture}|g" -e "s|{{LINKS}}|$links|" \
-  -e "s|{{STAMP}}|$stamp|" -e "s|{{VERSION}}|$VERSION|" "$TEMPLATE" > "$STAGE/index.html"
+# The index is the portfolio: content from portfolio.json, rendered into the template.
+node "$WORK/render.mjs" "$WORK/portfolio.json" "$TEMPLATE" "$STAGE/index.html" "$built" "$VERSION"
+cp -R "$WORK/brand" "$STAGE/brand"
 echo "ok" > "$STAGE/healthz"
 
 # Swap in the finished site in one step, so the server never shows a half-built one.

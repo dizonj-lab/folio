@@ -1,0 +1,59 @@
+{
+  "site": {
+    "title": "Joselito Dizon · Portfolio"
+  },
+  "profile": {
+    "name": "Joselito Villanueva Dizon",
+    "shortName": "Joselito Dizon",
+    "role": "AI Solution Architect",
+    "statement": "Making AI practical, personal, and meaningful in everyday life.",
+    "about": [
+      "Experienced technology architect passionate about AI and innovation. I design and build AI systems end to end — from the model and the data to the API, the interface and the server it runs on.",
+      "MealSenseAI was developed during my postgraduate studies in AI Systems at NUS, applying machine learning, computer vision and conversational AI. Both projects here are self-hosted on my own home server and run their models locally."
+    ],
+    "links": [
+      { "label": "LinkedIn", "href": "https://www.linkedin.com/in/joselito-dizon" },
+      { "label": "GitHub", "href": "https://github.com/dizonj-lab" }
+    ]
+  },
+  "projects": [
+    {
+      "slug": "mealsenseai",
+      "name": "MealSenseAI",
+      "logo": "brand/mealsenseai.svg",
+      "tagline": "Nutrition intelligence from a photo of your meal.",
+      "description": "Photograph a meal and MealSenseAI segments the plate, identifies each food and estimates its nutrition, showing how it reached every number. A Meal Advisor answers questions grounded in your own logged meals, and glucose-impact estimates in mmol/L are always labelled as estimates, never as measurements.",
+      "highlights": [
+        "YOLO11 segmentation with an EfficientNet-B0 food classifier (Food-101 + FoodSG)",
+        "Explainable pipeline: every estimate shows its source and confidence",
+        "Grounded Meal Advisor on a local LLM via Ollama"
+      ],
+      "stack": ["Computer vision", "FastAPI", "React", "PostgreSQL", "Ollama"],
+      "status": "Live",
+      "context": "NUS · AI Systems",
+      "links": [
+        { "label": "Open app", "href": "https://mealsense.xtangent.ai" },
+        { "label": "Source", "href": "https://github.com/dizonj-lab/mealsenseai" }
+      ]
+    },
+    {
+      "slug": "cerebro",
+      "name": "CEREBRO",
+      "logo": "brand/cerebro.png",
+      "logoTile": true,
+      "tagline": "Adaptive Knowledge and Reasoning Digital Twin.",
+      "description": "CEREBRO turns personal documents and experience into a private, connected knowledge store — Learn, Connect, Reason, Recall. It ingests PDF, Word, PowerPoint and Markdown, proposes metadata for human approval, and answers questions with citations back to the exact fragment. A Galaxy view maps how topics connect; a Timeline orders what the documents themselves date.",
+      "highlights": [
+        "Enrichment proposes, a person approves — provenance on every field",
+        "Hybrid keyword and semantic recall with local embeddings",
+        "Ask with citations, on a local model — no cloud AI engine"
+      ],
+      "stack": ["Knowledge graphs", "Next.js", "FastAPI", "PostgreSQL", "Kubernetes"],
+      "status": "MVP",
+      "context": "Personal R&D",
+      "links": [
+        { "label": "Source", "href": "https://github.com/dizonj-lab/cerebro" }
+      ]
+    }
+  ]
+}
