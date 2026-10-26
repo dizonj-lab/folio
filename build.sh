@@ -38,7 +38,7 @@ fi
 
 # The index is the portfolio: content from portfolio.json (and pages/), rendered into the templates.
 node "$WORK/render.mjs" "$WORK" "$STAGE" "$built" "$VERSION"
-cp -R "$WORK/brand" "$STAGE/brand" && cp "$WORK/site.css" "$STAGE/site.css"
+cp -R "$WORK/brand" "$STAGE/brand" && cp "$WORK/site.css" "$WORK/charts.js" "$STAGE/"
 echo "ok" > "$STAGE/healthz"
 
 # Swap in the finished site in one step, so the server never shows a half-built one.

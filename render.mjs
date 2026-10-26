@@ -78,10 +78,41 @@ const blocks = {
   flow: b => `<ol class="flow">${b.steps.map(s => `<li${s === b.highlight ? ' class="key"' : ''}>${esc(s)}</li>`).join('')}</ol>`,
   note: b => `<p class="note">${b.label ? `<strong>${esc(b.label)}</strong> ` : ''}${esc(b.text)}</p>`,
 }
-const section = (s, i) => `
+// Charts: a block names a dataset in the page's charts file and the fields to plot. The spec goes to
+// charts.js, which draws it; the same rows are always written out as a table, so nothing depends on
+// JavaScript or on hovering.
+const fmts = { pct: v => (v * 100).toFixed(1) + '%', num: v => Math.round(v).toLocaleString('en'), dec: v => v.toFixed(2) }
+const pick = (row, key) => key.includes('{') ? key.replace(/\{(\w+)\}/g, (_, k) => row[k]) : row[key]
+const chart = (b, data) => {
+  const rows = data[b.data]
+  if (!rows) throw new Error(`chart "${b.title}": no dataset "${b.data}" in the charts file`)
+  const f = b.format ?? 'num'
+  const series = (b.series ?? []).map((sr, i) => ({ label: sr.label, color: sr.color ?? i + 1, values: rows.map(r => r[sr.field]) }))
+  const spec = b.kind === 'reliability'
+    ? { kind: b.kind, title: b.title, xTitle: b.xTitle, points: rows.map(r => ({ x: r[b.xField], y: r[b.yField], n: r[b.nField], bin: r[b.binField] })) }
+    : {
+        kind: b.kind, title: b.title, format: f, x: rows.map(r => String(pick(r, b.x))), series,
+        xLabel: b.xLabel ?? '', xNote: b.xNote ? rows.map(r => r[b.xNote]) : undefined,
+        yMin: b.yMin, yMax: b.yMax, ticks: b.ticks, divider: b.divider, labels: b.labels,
+        note: b.note ? rows.map(r => fmts[b.note.format](r[b.note.field])) : undefined, noteLabel: b.note?.label,
+      }
+  const cols = b.table ?? [
+    { label: b.xLabel || b.x, field: b.x },
+    ...(b.series ?? []).map(sr => ({ label: sr.label, field: sr.field, format: f })),
+    ...(b.note ? [{ label: b.note.label, field: b.note.field, format: b.note.format }] : []),
+  ]
+  const legend = series.length > 1 ? `<div class="legend">${series.map(sr => `<span><i class="s${sr.color}"></i>${esc(sr.label)}</span>`).join('')}</div>` : ''
+  return `<figure class="chart">
+          <figcaption><strong>${esc(b.title)}</strong>${b.caption ? `<span>${esc(b.caption)}</span>` : ''}</figcaption>
+          ${legend}<div class="plot" data-chart="${esc(JSON.stringify(spec))}"></div>
+          <details><summary>Data table</summary>${table({ head: cols.map(c => c.label), rows: rows.map(r => cols.map(c => { const v = pick(r, c.field); return c.format ? fmts[c.format](v) : String(v) })) })}</details>
+        </figure>`
+}
+
+const section = (s, i, data) => `
       <section id="${esc(s.id)}">
         <h2><span class="n">${String(i + 1).padStart(2, '0')}</span>${esc(s.heading)}</h2>
-        ${s.blocks.map(b => blocks[b.type](b)).join('\n        ')}
+        ${s.blocks.map(b => b.type === 'chart' ? chart(b, data) : blocks[b.type](b)).join('\n        ')}
       </section>`
 
 mkdirSync(stage, { recursive: true })
@@ -99,6 +130,7 @@ writeFileSync(join(stage, 'index.html'), fill('index.template.html', {
 for (const p of projects) {
   for (const s of p.subprojects ?? []) {
     const page = JSON.parse(readFileSync(join(work, s.content), 'utf8'))
+    const data = page.charts ? JSON.parse(readFileSync(join(work, page.charts), 'utf8')) : {}
     const dir = join(stage, 'work', p.slug, s.slug)
     mkdirSync(dir, { recursive: true })
     writeFileSync(join(dir, 'index.html'), fill('page.template.html', {
@@ -111,7 +143,8 @@ for (const p of projects) {
       MARK: mark(p),
       META: page.meta?.length ? `<dl class="meta">${page.meta.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : '',
       STATS: page.stats?.length ? `<div class="stats">${page.stats.map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>` : '',
-      SECTIONS: (page.sections ?? []).map(section).join(''),
+      SECTIONS: (page.sections ?? []).map((sec, i) => section(sec, i, data)).join(''),
+      SCRIPTS: page.charts ? '<script src="/charts.js" defer></script>' : '',
     }))
   }
 }

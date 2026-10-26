@@ -2,6 +2,7 @@
 :root {
   --bg: #fafaf9; --surface: #ffffff; --ink: #18181b; --muted: #5f5f68; --faint: #8a8a94;
   --line: #e7e5e4; --accent: #0f766e; --accent-soft: #e6f4f1; --chip: #f4f4f5; --tile: #ffffff;
+  --series-1: #2a78d6; --series-2: #eb6834;
   --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px -12px rgb(0 0 0 / .10);
   color-scheme: light;
 }
@@ -10,6 +11,7 @@
   :root:not([data-theme="light"]) {
     --bg: #0c0d0f; --surface: #141518; --ink: #ececef; --muted: #a3a3ad; --faint: #75757f;
     --line: #26272c; --accent: #5eead4; --accent-soft: #11302c; --chip: #1c1d21; --tile: #f4f4f5;
+    --series-1: #3987e5; --series-2: #d95926;
     --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
     color-scheme: dark;
   }
@@ -17,6 +19,7 @@
 :root[data-theme="dark"] {
   --bg: #0c0d0f; --surface: #141518; --ink: #ececef; --muted: #a3a3ad; --faint: #75757f;
   --line: #26272c; --accent: #5eead4; --accent-soft: #11302c; --chip: #1c1d21; --tile: #f4f4f5;
+  --series-1: #3987e5; --series-2: #d95926;
   --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
   color-scheme: dark;
 }
@@ -160,3 +163,40 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
 .note strong { color: var(--accent); }
 .back { display: inline-block; margin: 32px 0 56px; color: var(--accent); text-decoration: none; font-weight: 550; }
 .back:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* Charts (drawn by charts.js). Series colours were validated for colour-vision deficiency on both
+   theme surfaces; text always uses ink tokens, never a series colour. */
+.chart { margin: 8px 0 24px; padding: 18px 18px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.chart figcaption { display: grid; gap: 2px; margin-bottom: 10px; }
+.chart figcaption strong { font-size: .95rem; }
+.chart figcaption span { color: var(--muted); font-size: .85rem; line-height: 1.45; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0 0 6px; font-size: .82rem; color: var(--muted); }
+.legend i { display: inline-block; width: 14px; height: 3px; margin-right: 6px; vertical-align: middle; border-radius: 2px; }
+.legend i.s1, .tip-key.s1 { background: var(--series-1); }
+.legend i.s2, .tip-key.s2 { background: var(--series-2); }
+.plot { position: relative; min-height: 120px; }
+.plot svg { display: block; overflow: visible; }
+.plot .grid { stroke: var(--line); stroke-width: 1; }
+.plot .axis { stroke: var(--faint); stroke-width: 1; }
+.plot .tick { fill: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; }
+.plot .axis-title, .plot .phase { fill: var(--muted); font-size: 11px; }
+.plot .value { fill: var(--ink); font-size: 11.5px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.plot .rowlabel { fill: var(--ink); font-size: 12.5px; }
+.plot .divider { stroke: var(--faint); stroke-width: 1; stroke-dasharray: 4 4; }
+.plot .crosshair { stroke: var(--faint); stroke-width: 1; }
+.plot .line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.plot .line.s1 { stroke: var(--series-1); } .plot .line.s2 { stroke: var(--series-2); }
+.plot .dot { stroke: var(--surface); stroke-width: 2; }
+.plot .dot.s1, .plot .bar.s1 { fill: var(--series-1); } .plot .dot.s2, .plot .bar.s2 { fill: var(--series-2); }
+.plot rect[tabindex]:focus, .plot circle[tabindex]:focus { outline: none; stroke: var(--accent); stroke-width: 1.5; }
+.chart-tip { position: absolute; z-index: 2; pointer-events: none; min-width: 140px; padding: 8px 10px; background: var(--surface);
+  border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); font-size: .8rem; }
+.tip-title { margin-bottom: 4px; color: var(--muted); }
+.tip-row { display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.tip-row strong { color: var(--ink); font-variant-numeric: tabular-nums; }
+.tip-row span:last-child { color: var(--muted); }
+.tip-key { width: 12px; height: 2px; border-radius: 1px; }
+.chart details { margin-top: 6px; font-size: .85rem; }
+.chart summary { cursor: pointer; color: var(--muted); padding: 4px 0; }
+.chart summary:hover { color: var(--accent); }
+.chart details .table { margin-top: 8px; }

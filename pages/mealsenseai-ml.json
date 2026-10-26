@@ -1,139 +1,590 @@
 {
   "kicker": "Data engineering · Machine learning · Evaluation",
   "title": "Data Engineering, Machine Learning and Model Evaluation",
-  "summary": "Building MealSenseAI's food classifier: two public datasets merged into one 320-class taxonomy, audited for leakage and conflicting labels, and used to fine-tune EfficientNet-B0 on a self-hosted GPU.",
+  "summary": "Building MealSenseAI's food classifier: two public datasets merged into one 320-class taxonomy, audited for leakage and conflicting labels, and used to fine-tune EfficientNet-B0 on a self-hosted GPU — reaching 70.6% top-1 and 85.7% top-3 accuracy on 45,800 held-out test images.",
   "meta": [
-    ["Technology", "Python · PyTorch · EfficientNet-B0 · CUDA · Docker · FastAPI · PostgreSQL"],
-    ["Environment", "Ubuntu Linux · NVIDIA GeForce RTX 5060 Ti (16 GB VRAM)"]
+    [
+      "Technology",
+      "Python · PyTorch · EfficientNet-B0 · CUDA · Docker · FastAPI · PostgreSQL"
+    ],
+    [
+      "Environment",
+      "Ubuntu Linux · NVIDIA GeForce RTX 5060 Ti (16 GB VRAM)"
+    ]
   ],
   "stats": [
-    ["310,861", "images"],
-    ["320", "harmonised classes"],
-    ["2", "source datasets"],
-    ["728", "cross-split duplicate groups caught"]
+    [
+      "310,861",
+      "images audited"
+    ],
+    [
+      "320",
+      "harmonised classes"
+    ],
+    [
+      "70.6%",
+      "top-1 test accuracy"
+    ],
+    [
+      "85.7%",
+      "top-3 test accuracy"
+    ]
   ],
   "sections": [
     {
       "id": "overview",
       "heading": "Overview",
       "blocks": [
-        { "type": "text", "paragraphs": [
-          "MealSenseAI estimates the nutrition of everyday meals from a photograph, with a focus on Singaporean and Southeast Asian dishes that general food datasets cover poorly. It combines computer vision, transfer learning, nutrition-database mapping and small language models (SLMs).",
-          "This work produced its classifier: one model over a unified food taxonomy, built from two public datasets whose labels were harmonised and whose quality was checked before any accuracy was measured."
-        ] }
+        {
+          "type": "text",
+          "paragraphs": [
+            "MealSenseAI estimates the nutrition of everyday meals from a photograph, with a focus on Singaporean and Southeast Asian dishes that general food datasets cover poorly. It combines computer vision, transfer learning, nutrition-database mapping and small language models (SLMs).",
+            "This work produced its classifier: one model over a unified food taxonomy, built from two public datasets whose labels were harmonised and whose quality was checked before any accuracy was measured."
+          ]
+        }
       ]
     },
     {
       "id": "data",
       "heading": "Datasets",
       "blocks": [
-        { "type": "text", "paragraphs": ["Two labelled image datasets pair international coverage with Singapore-specific dishes."] },
-        { "type": "table", "head": ["", "Food-101", "FoodSG-233"], "rows": [
-          ["Focus", "International cuisine", "Singapore cuisine"],
-          ["Images", "101,000", "209,861"],
-          ["Classes", "101", "233"],
-          ["Images per class", "1,000", "309–5,033"],
-          ["Role", "General food recognition", "Local cuisine specialisation"]
-        ] },
-        { "type": "text", "paragraphs": ["Combined: 310,861 images and 334 class entries, harmonised into 320 classes — broader coverage than either source alone, especially for food eaten in Singapore."] }
+        {
+          "type": "text",
+          "paragraphs": [
+            "Two labelled image datasets pair international coverage with Singapore-specific dishes."
+          ]
+        },
+        {
+          "type": "table",
+          "head": [
+            "",
+            "Food-101",
+            "FoodSG-233"
+          ],
+          "rows": [
+            [
+              "Focus",
+              "International cuisine",
+              "Singapore cuisine"
+            ],
+            [
+              "Images",
+              "101,000",
+              "209,861"
+            ],
+            [
+              "Classes",
+              "101",
+              "233"
+            ],
+            [
+              "Images per class",
+              "1,000",
+              "309–5,033"
+            ],
+            [
+              "Role",
+              "General food recognition",
+              "Local cuisine specialisation"
+            ]
+          ]
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Combined: 310,861 images and 334 class entries, harmonised into 320 classes — broader coverage than either source alone, especially for food eaten in Singapore."
+          ]
+        }
       ]
     },
     {
       "id": "preparation",
       "heading": "Data preparation",
       "blocks": [
-        { "type": "subheading", "text": "1 · Validation" },
-        { "type": "text", "paragraphs": ["Every image was checked for integrity and duplication."] },
-        { "type": "table", "head": ["Check", "Result"], "rows": [
-          ["Images checked", "310,861"],
-          ["Missing images", "0"],
-          ["Duplicate groups", "2,040"],
-          ["Cross-split duplicate groups", "728"],
-          ["Conflicting-label duplicate groups", "2,019"]
-        ] },
-        { "type": "note", "label": "Why it matters.", "text": "A duplicate that lands in both training and test leaks the answer and inflates accuracy; duplicates with conflicting labels teach the model contradictions. Both have to be found before a score means anything." },
-        { "type": "subheading", "text": "2 · Label harmonisation" },
-        { "type": "text", "paragraphs": ["The two datasets overlap and name foods differently. Their 334 class entries — 10 of them exact matches once names were normalised — were consolidated into an approved taxonomy of 320 classes, used for both training and inference."] },
-        { "type": "subheading", "text": "3 · Image preprocessing" },
-        { "type": "list", "items": [
-          "RGB standardisation and resizing to a consistent input resolution",
-          "Pixel normalisation compatible with the pretrained network",
-          "Training, validation and test partitions",
-          "Augmentation — rotation, flips, crops, zoom, brightness and contrast — on the training partition only, so validation and test stay independent"
-        ] }
+        {
+          "type": "subheading",
+          "text": "1 · Validation"
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Every image was checked for integrity and duplication."
+          ]
+        },
+        {
+          "type": "table",
+          "head": [
+            "Check",
+            "Result"
+          ],
+          "rows": [
+            [
+              "Images checked",
+              "310,861"
+            ],
+            [
+              "Missing images",
+              "0"
+            ],
+            [
+              "Duplicate groups",
+              "2,040"
+            ],
+            [
+              "Cross-split duplicate groups",
+              "728"
+            ],
+            [
+              "Conflicting-label duplicate groups",
+              "2,019"
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "label": "Why it matters.",
+          "text": "A duplicate that lands in both training and test leaks the answer and inflates accuracy; duplicates with conflicting labels teach the model contradictions. Both have to be found before a score means anything."
+        },
+        {
+          "type": "subheading",
+          "text": "2 · Label harmonisation"
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "The two datasets overlap and name foods differently. Their 334 class entries — 10 of them exact matches once names were normalised — were consolidated into an approved taxonomy of 320 classes, used for both training and inference."
+          ]
+        },
+        {
+          "type": "subheading",
+          "text": "3 · Image preprocessing"
+        },
+        {
+          "type": "list",
+          "items": [
+            "RGB standardisation and resizing to a consistent input resolution",
+            "Pixel normalisation compatible with the pretrained network",
+            "Training, validation and test partitions",
+            "Augmentation — rotation, flips, crops, zoom, brightness and contrast — on the training partition only, so validation and test stay independent"
+          ]
+        }
       ]
     },
     {
       "id": "training",
       "heading": "Model and training",
       "blocks": [
-        { "type": "text", "paragraphs": ["The classifier uses transfer learning on EfficientNet-B0, an architecture that balances accuracy against compute. Its pretrained visual features were kept and the classification layers adapted to the unified taxonomy, rather than training a network from scratch."] },
-        { "type": "table", "head": ["Experiment", "Purpose"], "rows": [
-          ["EXP-001 · Unified classification", "Baseline classifier over both international and Singapore-specific classes"],
-          ["EXP-002 · Fine-tuning", "Continues from the EXP-001 checkpoint for five further epochs to improve classification"]
-        ] },
-        { "type": "table", "head": ["Infrastructure", ""], "rows": [
-          ["GPU", "NVIDIA RTX 5060 Ti, 16 GB"],
-          ["Framework", "PyTorch 2.11.0+cu128 on CUDA 12.8"],
-          ["Host", "Self-hosted Ubuntu workstation"],
-          ["Deployment", "Containerised inference (Docker)"]
-        ] },
-        { "type": "text", "paragraphs": ["GPU execution under CUDA was validated, and checkpoints from both experiments were retained for evaluation and integration."] }
+        {
+          "type": "text",
+          "paragraphs": [
+            "The classifier uses transfer learning on EfficientNet-B0, an architecture that balances accuracy against compute. Training ran in two stages: first only a new classification head over frozen ImageNet features, then the top of the network itself."
+          ]
+        },
+        {
+          "type": "table",
+          "head": [
+            "Experiment",
+            "Strategy",
+            "Settings"
+          ],
+          "rows": [
+            [
+              "EXP-001 · Unified classification",
+              "Frozen backbone; new 320-class head",
+              "5 epochs · learning rate 1e-4 · batch 32 · 224 px"
+            ],
+            [
+              "EXP-002 · Fine-tuning",
+              "From the EXP-001 checkpoint, last 3 feature blocks unfrozen (3.57 M of 4.42 M parameters trainable)",
+              "5 epochs · learning rate 1e-5 backbone, 5e-5 head · weight decay 1e-4"
+            ]
+          ]
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Images were split 232,713 for training, 28,155 for validation and 45,800 held back for the final test. Both experiments share a fixed seed and the same augmentation, applied to training images only."
+          ]
+        },
+        {
+          "type": "chart",
+          "kind": "line",
+          "title": "Validation accuracy and macro-F1 by epoch",
+          "caption": "Fine-tuning lifted macro-F1 from 0.58 to 0.66; the curve was still rising at the last epoch.",
+          "data": "epochs",
+          "x": "epoch",
+          "xLabel": "Epoch",
+          "xNote": "experiment",
+          "format": "pct",
+          "yMin": 0.4,
+          "yMax": 0.8,
+          "divider": {
+            "after": 5,
+            "labels": [
+              "EXP-001 · frozen",
+              "EXP-002 · fine-tuned"
+            ]
+          },
+          "series": [
+            {
+              "field": "val_accuracy",
+              "label": "Validation accuracy"
+            },
+            {
+              "field": "val_f1_macro",
+              "label": "Validation macro-F1"
+            }
+          ]
+        },
+        {
+          "type": "chart",
+          "kind": "line",
+          "title": "Training and validation loss",
+          "caption": "Validation loss stays below training loss because augmentation applies only to training images. The brief rise at epoch 6 is the network adjusting as backbone layers unfreeze; neither curve had flattened by epoch 10.",
+          "data": "epochs",
+          "x": "epoch",
+          "xLabel": "Epoch",
+          "xNote": "experiment",
+          "format": "dec",
+          "yMin": 1.0,
+          "yMax": 3.5,
+          "divider": {
+            "after": 5,
+            "labels": [
+              "EXP-001",
+              "EXP-002"
+            ]
+          },
+          "series": [
+            {
+              "field": "train_loss",
+              "label": "Training loss"
+            },
+            {
+              "field": "val_loss",
+              "label": "Validation loss"
+            }
+          ],
+          "ticks": 5
+        },
+        {
+          "type": "table",
+          "head": [
+            "Infrastructure",
+            ""
+          ],
+          "rows": [
+            [
+              "GPU",
+              "NVIDIA RTX 5060 Ti, 16 GB — peak training memory 1.2 GB"
+            ],
+            [
+              "Framework",
+              "PyTorch 2.11.0+cu128, torchvision 0.26.0, CUDA 12.8, Python 3.12"
+            ],
+            [
+              "Training time",
+              "About 20 minutes per experiment (~4 minutes per epoch, ~975 images/s)"
+            ],
+            [
+              "Traceability",
+              "Checkpoint and training manifest recorded by SHA-256"
+            ]
+          ]
+        }
       ]
     },
     {
       "id": "evaluation",
-      "heading": "Evaluation",
+      "heading": "Evaluation results",
       "blocks": [
-        { "type": "text", "paragraphs": ["The framework uses standard multiclass measures, alongside the cost of running the model."] },
-        { "type": "table", "head": ["Measure", "What it shows"], "rows": [
-          ["Accuracy", "Overall correctness"],
-          ["Precision · Recall · F1", "Reliability of predictions, coverage of true classes, and their balance"],
-          ["Confusion matrix", "Which foods are mistaken for each other"],
-          ["Training and validation loss", "Optimisation progress and overfitting"],
-          ["Inference latency · GPU utilisation", "Response time and compute cost"]
-        ] },
-        { "type": "text", "paragraphs": ["Each run records its dataset version and partitions, architecture and checkpoint, configuration, epoch-level metrics, evaluation outputs, runtime and GPU performance, with timestamps — so any result can be reproduced and traced."] },
-        { "type": "note", "label": "Status.", "text": "The dataset audit, both training experiments, GPU validation and checkpoints are documented. Final accuracy, precision, recall, F1 and confusion-matrix values are being verified against the saved experiment outputs and are not published until they are." }
+        {
+          "type": "text",
+          "paragraphs": [
+            "The fine-tuned EXP-002 model was scored once on the 45,800 test images it never saw during training or model selection. Every figure here comes from that run's saved outputs."
+          ]
+        },
+        {
+          "type": "table",
+          "head": [
+            "Measure",
+            "Result"
+          ],
+          "rows": [
+            [
+              "Top-1 accuracy",
+              "70.6%"
+            ],
+            [
+              "Top-3 accuracy",
+              "85.7%"
+            ],
+            [
+              "Macro precision · recall · F1",
+              "66.9% · 67.9% · 0.667"
+            ],
+            [
+              "Throughput",
+              "1,442 images/s · 0.69 ms per image (batch 32, RTX 5060 Ti)"
+            ],
+            [
+              "Calibration error (ECE)",
+              "2.3%"
+            ]
+          ]
+        },
+        {
+          "type": "note",
+          "label": "Why top-3 matters.",
+          "text": "The app shows its best guesses and the person confirms or corrects. With the right food among the first three 85.7% of the time, a correction is usually one tap."
+        },
+        {
+          "type": "chart",
+          "kind": "columns",
+          "title": "Test accuracy by source dataset",
+          "caption": "Singapore dishes are harder: more classes, fewer images for many of them, and many look alike.",
+          "data": "sources",
+          "x": "source",
+          "xLabel": "Source",
+          "format": "pct",
+          "yMax": 1,
+          "labels": true,
+          "series": [
+            {
+              "field": "top1",
+              "label": "Top-1 accuracy"
+            },
+            {
+              "field": "top3",
+              "label": "Top-3 accuracy"
+            }
+          ],
+          "table": [
+            {
+              "label": "Source",
+              "field": "source"
+            },
+            {
+              "label": "Test images",
+              "field": "test_images",
+              "format": "num"
+            },
+            {
+              "label": "Classes",
+              "field": "classes"
+            },
+            {
+              "label": "Top-1",
+              "field": "top1",
+              "format": "pct"
+            },
+            {
+              "label": "Top-3",
+              "field": "top3",
+              "format": "pct"
+            },
+            {
+              "label": "Macro-F1 (own classes)",
+              "field": "f1_macro",
+              "format": "dec"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Per-source macro-F1 — 0.75 for Food-101 and 0.67 for FoodSG-233 — is averaged over each source's own classes. The evaluation's per-dataset file averaged over all 320, counting every absent class as zero, which made Food-101 look like 0.24; the correction is part of the evidence pipeline."
+          ]
+        },
+        {
+          "type": "chart",
+          "kind": "columns",
+          "title": "How F1 is spread across the 320 classes",
+          "caption": "275 classes score F1 ≥ 0.5; a tail of 45 does not.",
+          "data": "f1_histogram",
+          "x": "range",
+          "xLabel": "F1 range",
+          "format": "num",
+          "series": [
+            {
+              "field": "classes",
+              "label": "Classes"
+            }
+          ],
+          "labels": true
+        },
+        {
+          "type": "table",
+          "head": [
+            "Weakest classes",
+            "F1",
+            "Test images"
+          ],
+          "rows": [
+            [
+              "mee siam, fried",
+              "0.00",
+              "43"
+            ],
+            [
+              "whole wheat",
+              "0.15",
+              "33"
+            ],
+            [
+              "bee hoon, soto",
+              "0.15",
+              "64"
+            ],
+            [
+              "tortilla plain",
+              "0.16",
+              "47"
+            ],
+            [
+              "lontong with sayur lodeh",
+              "0.23",
+              "43"
+            ],
+            [
+              "bee hoon",
+              "0.23",
+              "53"
+            ]
+          ]
+        },
+        {
+          "type": "chart",
+          "kind": "rows",
+          "title": "Most frequent confusions",
+          "caption": "Most are labels that overlap in meaning, not visual failures: a taxonomy problem as much as a vision one.",
+          "data": "confused",
+          "x": "{true} → {predicted}",
+          "xLabel": "True → predicted",
+          "format": "num",
+          "series": [
+            {
+              "field": "count",
+              "label": "Test images"
+            }
+          ],
+          "note": {
+            "field": "share",
+            "format": "pct",
+            "label": "of that class"
+          }
+        },
+        {
+          "type": "chart",
+          "kind": "reliability",
+          "title": "Confidence calibration",
+          "caption": "Each point is a confidence band: when the model says 80%, it is right about 80% of the time. It errs slightly toward caution in the middle bands.",
+          "data": "calibration",
+          "xField": "confidence",
+          "yField": "accuracy",
+          "nField": "samples",
+          "binField": "bin",
+          "xTitle": "Model confidence",
+          "table": [
+            {
+              "label": "Confidence band",
+              "field": "bin"
+            },
+            {
+              "label": "Test images",
+              "field": "samples",
+              "format": "num"
+            },
+            {
+              "label": "Mean confidence",
+              "field": "confidence",
+              "format": "pct"
+            },
+            {
+              "label": "Actual accuracy",
+              "field": "accuracy",
+              "format": "pct"
+            }
+          ]
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Calibration is what makes confidence usable in the product: 35% of test images were predicted with at least 90% confidence and those were right 97.3% of the time, so a threshold can decide when to accept a prediction and when to ask the person."
+          ]
+        },
+        {
+          "type": "note",
+          "label": "Caveat.",
+          "text": "The audit found 728 cross-split duplicate groups. The evidence does not record whether they were removed before splitting — the three splits total 306,668 of the 310,861 images audited — so test scores may be slightly optimistic until that is confirmed."
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Each run records its dataset partitions, architecture and checkpoint, configuration, epoch-level metrics, evaluation outputs, runtime and GPU performance, with timestamps — so any result can be reproduced and traced."
+          ]
+        }
       ]
     },
     {
       "id": "integration",
       "heading": "In the application",
       "blocks": [
-        { "type": "text", "paragraphs": ["The classifier is one stage of a modular inference pipeline. The person confirms or corrects each prediction before it counts."] },
-        { "type": "flow", "highlight": "Food classification (EfficientNet-B0)", "steps": [
-          "Photo capture",
-          "Preprocessing",
-          "Detection and segmentation",
-          "Food classification (EfficientNet-B0)",
-          "Prediction confidence",
-          "User confirmation or correction",
-          "Portion estimation",
-          "Nutrition database mapping",
-          "Meal-level totals",
-          "SLM-assisted explanation",
-          "Personal insights"
-        ] },
-        { "type": "text", "paragraphs": ["Keeping inference separate from application services lets detection, classification or nutrition analysis improve without redesigning the app. The aim is diabetes-aware insight — carbohydrate awareness and meal composition — as estimates, not medical advice."] }
+        {
+          "type": "text",
+          "paragraphs": [
+            "The classifier is one stage of a modular inference pipeline. The person confirms or corrects each prediction before it counts."
+          ]
+        },
+        {
+          "type": "flow",
+          "highlight": "Food classification (EfficientNet-B0)",
+          "steps": [
+            "Photo capture",
+            "Preprocessing",
+            "Detection and segmentation",
+            "Food classification (EfficientNet-B0)",
+            "Prediction confidence",
+            "User confirmation or correction",
+            "Portion estimation",
+            "Nutrition database mapping",
+            "Meal-level totals",
+            "SLM-assisted explanation",
+            "Personal insights"
+          ]
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Keeping inference separate from application services lets detection, classification or nutrition analysis improve without redesigning the app. The aim is diabetes-aware insight — carbohydrate awareness and meal composition — as estimates, not medical advice."
+          ]
+        }
       ]
     },
     {
       "id": "outcomes",
       "heading": "Outcomes and lessons",
       "blocks": [
-        { "type": "list", "items": [
-          "Consolidated two datasets — 310,861 images — into a 320-class taxonomy",
-          "Audited integrity and duplication, exposing potential leakage and label conflicts",
-          "Built a transfer-learning workflow on EfficientNet-B0, with baseline and fine-tuning stages and retained checkpoints",
-          "Validated GPU-accelerated training on a self-hosted CUDA workstation with consumer hardware",
-          "Designed a modular architecture linking computer vision, nutrition data and SLM explanations"
-        ] },
-        { "type": "text", "paragraphs": [
-          "Good machine learning is more than choosing and training a model: dataset quality, consistent labels, reproducible experiments, efficient compute and integration into the product matter as much.",
-          "Image-based nutrition estimation has real limits — mixed dishes, irregular portions and foods that look alike. Next: better multi-food instance segmentation, portion estimation and confidence calibration, and validation against independently labelled images."
-        ] }
+        {
+          "type": "list",
+          "items": [
+            "Consolidated two datasets — 310,861 images — into a 320-class taxonomy",
+            "Audited integrity and duplication, exposing potential leakage and label conflicts",
+            "Reached 70.6% top-1 and 85.7% top-3 accuracy on 45,800 held-out images, at 0.69 ms per image",
+            "Showed the model is well calibrated (ECE 2.3%), so its confidence can drive when to ask the person",
+            "Validated GPU-accelerated training on a self-hosted CUDA workstation with consumer hardware",
+            "Designed a modular architecture linking computer vision, nutrition data and SLM explanations"
+          ]
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Good machine learning is more than choosing and training a model: dataset quality, consistent labels, reproducible experiments, efficient compute and integration into the product matter as much. The largest confusions here came from the taxonomy, not the network.",
+            "Image-based nutrition estimation has real limits — mixed dishes, irregular portions and foods that look alike. Next: a hierarchical taxonomy for overlapping labels, longer fine-tuning while validation is still improving, confirmation that the test split is free of duplicates, better multi-food segmentation and portion estimation, and validation against independently labelled images."
+          ]
+        }
       ]
     }
-  ]
+  ],
+  "charts": "pages/mealsenseai-ml.charts.json"
 }

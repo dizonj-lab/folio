@@ -35,7 +35,7 @@
         {
           "slug": "data-and-ml",
           "title": "Data Engineering, Machine Learning and Model Evaluation",
-          "summary": "310,861 images, a 320-class taxonomy and a leakage audit behind an EfficientNet-B0 food classifier, fine-tuned on a self-hosted GPU.",
+          "summary": "310,861 images, a 320-class taxonomy and a leakage audit behind an EfficientNet-B0 classifier: 70.6% top-1 and 85.7% top-3 on 45,800 held-out images, with training and evaluation charts.",
           "content": "pages/mealsenseai-ml.json"
         }
       ],

@@ -68,6 +68,14 @@ dark theme). No HTML is needed to change content.
   `content` (a JSON file in `pages/`). The page is published at `/work/<project>/<slug>/` and
   linked from the card. A page is built from `sections`, each a list of blocks: `text`,
   `subheading`, `list`, `table`, `flow` and `note`; see `pages/mealsenseai-ml.json`.
+- **Charts:** a page can name a `charts` data file and use `chart` blocks (`line`, `columns`,
+  `rows`, `reliability`). `charts.js` draws them at the reader's screen width in the theme's
+  colours; each also gets a data table. MealSenseAI's chart data is derived from its training
+  evidence; after a new training or evaluation run, regenerate it on Buddy:
+
+  ```bash
+  python3 tools/evidence_charts.py ~/development/mealsenseai/evidence pages/mealsenseai-ml.charts.json
+  ```
 - **Architecture link:** added automatically when a LikeC4 model named after the `slug` is built.
   To add one, mount the model at `/models/<slug>` in `docker-compose.yml`.
 

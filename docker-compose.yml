@@ -28,6 +28,7 @@ services:
       - ./index.template.html:/work/index.template.html:ro
       - ./page.template.html:/work/page.template.html:ro
       - ./site.css:/work/site.css:ro
+      - ./charts.js:/work/charts.js:ro
       - ./pages:/work/pages:ro
       - ./render.mjs:/work/render.mjs:ro
       - ./portfolio.json:/work/portfolio.json:ro
