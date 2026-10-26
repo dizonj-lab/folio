@@ -24,8 +24,10 @@ for dir in "$MODELS"/*; do
   fi
   echo "==> $name: build"
   # Hash history keeps every view a plain file request, so nginx needs no rewrite rules.
+  # --no-use-dot: inside a container LikeC4 expects the Graphviz `dot` program, which the node
+  # image does not have; this uses LikeC4's bundled layout engine instead.
   npx -y "likec4@$VERSION" build "$dir" -o "$STAGE/$name" --base "/$name/" --use-hash-history \
-    --title "$name architecture"
+    --no-use-dot --title "$name architecture"
   built="$built $name"
 done
 
