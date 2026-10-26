@@ -99,7 +99,7 @@
     },
     {
       "id": "preparation",
-      "heading": "Data preparation",
+      "heading": "Data processing and preparation",
       "blocks": [
         {
           "type": "subheading",
@@ -152,7 +152,27 @@
         {
           "type": "text",
           "paragraphs": [
-            "The two datasets overlap and name foods differently. Their 334 class entries — 10 of them exact matches once names were normalised — were consolidated into an approved taxonomy of 320 classes, used for both training and inference."
+            "The two datasets name foods differently — Food-101 writes \"chicken_wings\", FoodSG-233 \"chicken wing\". Their 101 + 233 = 334 class entries describe 320 distinct foods: 14 appear in both sources and were merged into one class each, so the model learns one dumpling, not two competing ones."
+          ]
+        },
+        {
+          "type": "table",
+          "head": [
+            "How the 14 shared classes matched",
+            "Classes",
+            "Examples"
+          ],
+          "rows": [
+            [
+              "Identical after normalising case and underscores",
+              "10",
+              "fried_rice = fried rice · Bibimbap = bibimbap · sushi, pizza, tiramisu"
+            ],
+            [
+              "Plural and singular forms",
+              "4",
+              "chicken_wings, dumplings, pancakes, waffles"
+            ]
           ]
         },
         {
@@ -166,6 +186,23 @@
             "Pixel normalisation compatible with the pretrained network",
             "Training, validation and test partitions",
             "Augmentation — rotation, flips, crops, zoom, brightness and contrast — on the training partition only, so validation and test stay independent"
+          ]
+        },
+        {
+          "type": "subheading",
+          "text": "4 · Checking the evaluation data"
+        },
+        {
+          "type": "text",
+          "paragraphs": [
+            "Reviewing the saved evaluation outputs surfaced two issues that change how the scores should be read:"
+          ]
+        },
+        {
+          "type": "list",
+          "items": [
+            "A per-dataset scoring bug: macro-F1 for each source was averaged over all 320 classes, so every class a source doesn't contain counted as zero and Food-101 read 0.24. Averaged over its own 101 classes it is 0.75 (FoodSG-233: 0.67). The chart pipeline now computes it correctly.",
+            "An unexplained gap: the training, validation and test splits total 306,668 images — 4,193 fewer than the 310,861 audited — and the evidence does not record whether the 728 cross-split duplicate groups were among those removed. Until confirmed, test scores are treated as possibly slightly optimistic."
           ]
         }
       ]
@@ -393,7 +430,7 @@
         {
           "type": "text",
           "paragraphs": [
-            "Per-source macro-F1 — 0.75 for Food-101 and 0.67 for FoodSG-233 — is averaged over each source's own classes. The evaluation's per-dataset file averaged over all 320, counting every absent class as zero, which made Food-101 look like 0.24; the correction is part of the evidence pipeline."
+            "Per-source macro-F1 is 0.75 for Food-101 and 0.67 for FoodSG-233, averaged over each source's own classes (see Data processing, step 4)."
           ]
         },
         {
@@ -516,7 +553,7 @@
         {
           "type": "note",
           "label": "Caveat.",
-          "text": "The audit found 728 cross-split duplicate groups. The evidence does not record whether they were removed before splitting — the three splits total 306,668 of the 310,861 images audited — so test scores may be slightly optimistic until that is confirmed."
+          "text": "Whether the 728 cross-split duplicate groups were removed before splitting is not recorded (see Data processing, step 4), so these test scores may be slightly optimistic until that is confirmed."
         },
         {
           "type": "text",
