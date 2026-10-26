@@ -26,6 +26,9 @@ services:
     volumes:
       - ./build.sh:/work/build.sh:ro
       - ./index.template.html:/work/index.template.html:ro
+      - ./page.template.html:/work/page.template.html:ro
+      - ./site.css:/work/site.css:ro
+      - ./pages:/work/pages:ro
       - ./render.mjs:/work/render.mjs:ro
       - ./portfolio.json:/work/portfolio.json:ro
       - ./brand:/work/brand:ro

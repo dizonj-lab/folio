@@ -31,6 +31,14 @@
       "stack": ["Computer vision", "FastAPI", "React", "PostgreSQL", "Ollama"],
       "status": "Live",
       "context": "NUS · AI Systems",
+      "subprojects": [
+        {
+          "slug": "data-and-ml",
+          "title": "Data Engineering, Machine Learning and Model Evaluation",
+          "summary": "310,861 images, a 320-class taxonomy and a leakage audit behind an EfficientNet-B0 food classifier, fine-tuned on a self-hosted GPU.",
+          "content": "pages/mealsenseai-ml.json"
+        }
+      ],
       "links": [
         { "label": "Open app", "href": "https://mealsense.xtangent.ai" },
         { "label": "Source", "href": "https://github.com/dizonj-lab/mealsenseai" }

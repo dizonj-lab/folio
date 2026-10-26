@@ -5,7 +5,8 @@ A professional portfolio page with the LikeC4 architecture models of **MealSense
 
 | URL | Contents |
 |---|---|
-| `http://192.168.1.25:8095/` | Portfolio: profile, projects with logos and descriptions, contact |
+| `http://192.168.1.25:8095/` | Portfolio: profile, projects with logos and descriptions, contact; light/dark switch |
+| `http://192.168.1.25:8095/work/mealsenseai/data-and-ml/` | MealSenseAI sub-project: data engineering, machine learning and model evaluation |
 | `http://192.168.1.25:8095/mealsenseai/` | MealSenseAI: landscape, capabilities, product rules, containers, backend components, Buddy, and three flows (photo to nutrition, glucose estimate, Meal Advisor) |
 | `http://192.168.1.25:8095/cerebro/` | CEREBRO: its 16 views, from `architecture/likec4` on the `cerebro-mvp` branch |
 
@@ -54,16 +55,24 @@ Cloudflare Access (email login); do not publish it without Access.
 
 ## Edit the portfolio
 
-All the page's words live in `portfolio.json`; the layout is `index.template.html`. No HTML is
-needed to change content.
+All the words live in `portfolio.json` and `pages/`; the layout is `index.template.html`,
+`page.template.html` and the shared `site.css` (colours are tokens on `:root`, re-pointed for the
+dark theme). No HTML is needed to change content.
 
 - **Add a project:** append an entry to `projects` (`slug`, `name`, `tagline`, `description`, and
   optionally `logo`, `logoTile`, `highlights`, `stack`, `status`, `context`, `links`). Without a
   `logo` the card shows the project's initials.
 - **Logo:** put the file in `brand/` and set `"logo": "brand/<file>"`. Set `"logoTile": true` for a
   mark drawn in dark ink, so it stays visible on the dark theme.
+- **Sub-project page:** add to the project's `subprojects` a `slug`, `title`, `summary` and
+  `content` (a JSON file in `pages/`). The page is published at `/work/<project>/<slug>/` and
+  linked from the card. A page is built from `sections`, each a list of blocks: `text`,
+  `subheading`, `list`, `table`, `flow` and `note`; see `pages/mealsenseai-ml.json`.
 - **Architecture link:** added automatically when a LikeC4 model named after the `slug` is built.
   To add one, mount the model at `/models/<slug>` in `docker-compose.yml`.
+
+The theme follows the visitor's system setting until they use the switch; their choice is then
+remembered in the browser.
 
 Then rerun `./infrastructure/architecture-site/setup.sh`.
 

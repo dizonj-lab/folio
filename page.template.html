@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{PAGE_TITLE}} · {{PROJECT}} · {{SHORT_NAME}}</title>
+  <meta name="description" content="{{SUMMARY}}">
+  <link rel="icon" href="/brand/mealsenseai.svg">
+  <link rel="stylesheet" href="/site.css">
+  {{THEME_SCRIPT}}
+</head>
+<body>
+  <div class="top">
+    <div class="wrap">
+      <a href="/" style="text-decoration:none"><strong>{{SHORT_NAME}}</strong></a>
+      <div class="top-actions">
+        <nav><a href="/#work">Work</a><a href="/#about">About</a><a href="/#contact">Contact</a></nav>
+        {{THEME_BUTTON}}
+      </div>
+    </div>
+  </div>
+
+  <main class="wrap">
+    <article class="case">
+      <p class="crumbs"><a href="/#work">Work</a> / <a href="/#{{PROJECT_SLUG}}">{{PROJECT}}</a> / {{KICKER}}</p>
+      <div class="case-head">
+        {{MARK}}
+        <div>
+          <h1>{{PAGE_TITLE}}</h1>
+          <p class="lede">{{SUMMARY}}</p>
+        </div>
+      </div>
+      {{META}}
+      {{STATS}}
+      {{SECTIONS}}
+      <a class="back" href="/#{{PROJECT_SLUG}}">← Back to {{PROJECT}}</a>
+    </article>
+  </main>
+
+  <footer class="wrap site-foot">
+    <span>© {{YEAR}} {{NAME}}</span>
+    <span>Built {{STAMP}}</span>
+  </footer>
+</body>
+</html>

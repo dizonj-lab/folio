@@ -7,7 +7,6 @@ VERSION="${LIKEC4_VERSION:-1.60.0}"
 MODELS="${MODELS_DIR:-/models}"
 SITE="${SITE_DIR:-/site}"
 WORK="${WORK_DIR:-/work}"
-TEMPLATE="${TEMPLATE:-$WORK/index.template.html}"
 STAGE="${TMPDIR:-/tmp}/likec4-site"
 rm -rf "$STAGE" && mkdir -p "$STAGE"
 built=""
@@ -37,9 +36,9 @@ if [ -z "$built" ]; then
   exit 1
 fi
 
-# The index is the portfolio: content from portfolio.json, rendered into the template.
-node "$WORK/render.mjs" "$WORK/portfolio.json" "$TEMPLATE" "$STAGE/index.html" "$built" "$VERSION"
-cp -R "$WORK/brand" "$STAGE/brand"
+# The index is the portfolio: content from portfolio.json (and pages/), rendered into the templates.
+node "$WORK/render.mjs" "$WORK" "$STAGE" "$built" "$VERSION"
+cp -R "$WORK/brand" "$STAGE/brand" && cp "$WORK/site.css" "$STAGE/site.css"
 echo "ok" > "$STAGE/healthz"
 
 # Swap in the finished site in one step, so the server never shows a half-built one.
