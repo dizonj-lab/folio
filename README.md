@@ -1,107 +1,65 @@
-# Portfolio and architecture site on the home server
+# folio — Joel Dizon's portfolio
 
-A professional portfolio page with the LikeC4 architecture models of **MealSenseAI** and
-**CEREBRO**, served as one static website on Buddy's home network:
+The portfolio at **https://folio.xtangent.ai**: profile, projects with logos and short descriptions,
+contact, a light/dark switch, the MealSenseAI data-and-ML sub-project, and the LikeC4 architecture
+models of **MealSenseAI** and **CEREBRO**. One static site, served by nginx on Buddy.
 
-| URL | Contents |
+| Path | Contents |
 |---|---|
-| `http://192.168.1.25:8095/` | Portfolio: profile, projects with logos and descriptions, contact; light/dark switch |
-| `http://192.168.1.25:8095/work/mealsenseai/data-and-ml/` | MealSenseAI sub-project: data engineering, machine learning and model evaluation |
-| `http://192.168.1.25:8095/mealsenseai/` | MealSenseAI: landscape, capabilities, product rules, containers, backend components, Buddy, and three flows (photo to nutrition, glucose estimate, Meal Advisor) |
-| `http://192.168.1.25:8095/cerebro/` | CEREBRO: its 16 views, from `architecture/likec4` on the `cerebro-mvp` branch |
+| `/` | Portfolio: profile, projects, contact |
+| `/work/mealsenseai/data-and-ml/` | MealSenseAI sub-project: data engineering, machine learning, model evaluation, with charts from the training evidence |
+| `/mealsenseai/` | MealSenseAI architecture: landscape, capabilities, product rules, containers, components, Buddy, three flows |
+| `/cerebro/` | CEREBRO architecture: its views, from `architecture/likec4` in the CEREBRO repository |
 
-It is a separate Compose project (`architecture`), so it never touches the MealSenseAI or CEREBRO
-containers, databases or volumes.
-
-## Set up
-
-On Buddy, with both repositories cloned (MealSenseAI where you deploy it from, CEREBRO at
-`~/cerebro` on the `cerebro-mvp` branch):
-
-```bash
-cd ~/MealSenseAI            # wherever this repository lives on Buddy
-git pull
-./infrastructure/architecture-site/setup.sh
-```
-
-The script:
-
-1. works out Buddy's LAN address (or takes `ARCH_BIND=192.168.1.25`) and refuses `0.0.0.0`;
-2. checks the port (default `8095`, or `ARCH_PORT=…`) is free;
-3. finds the CEREBRO model in `CEREBRO_DIR` (default `~/cerebro`); if it is missing, it builds the
-   MealSenseAI model alone and tells you how to add CEREBRO;
-4. builds both models with LikeC4 `1.60.0` in a throwaway Node container, then starts nginx.
-
-Settings are saved in `infrastructure/architecture-site/.env`, so later runs need no arguments.
-
-## Update after a model changes
-
-```bash
-cd ~/cerebro && git pull                      # if the CEREBRO model changed
-cd ~/MealSenseAI && git pull && ./infrastructure/architecture-site/setup.sh
-```
-
-Only the build reruns; nginx keeps serving the previous site until the new one is complete.
-
-## Who can reach it
-
-The port is bound to the LAN address only. Docker publishes ports outside UFW, which is why it is
-never bound to every interface: devices on your home network can open it, and nothing outside the
-house can, because no router port is forwarded. It is **not** published through the Cloudflare
-Tunnel. To reach it over Tailscale too, run once with `ARCH_BIND=<Buddy's Tailscale IP>` instead.
-
-If you later want it on the internet, add a hostname to the existing tunnel and put it behind
-Cloudflare Access (email login); do not publish it without Access.
+It used to live inside the MealSenseAI repository (`infrastructure/architecture-site`); this
+repository carries its history. It is its own Compose project (`folio`) and shares no container,
+network or volume with MealSenseAI or CEREBRO.
 
 ## Edit the portfolio
 
 All the words live in `portfolio.json` and `pages/`; the layout is `index.template.html`,
 `page.template.html` and the shared `site.css` (colours are tokens on `:root`, re-pointed for the
-dark theme). No HTML is needed to change content.
+dark theme). No HTML is needed to change content. `tools/evidence_charts.py` turns MealSenseAI's
+training evidence into `pages/mealsenseai-ml.charts.json`.
 
-- **Add a project:** append an entry to `projects` (`slug`, `name`, `tagline`, `description`, and
-  optionally `logo`, `logoTile`, `highlights`, `stack`, `status`, `context`, `links`). Without a
-  `logo` the card shows the project's initials.
-- **Logo:** put the file in `brand/` and set `"logo": "brand/<file>"`. Set `"logoTile": true` for a
-  mark drawn in dark ink, so it stays visible on the dark theme.
-- **Sub-project page:** add to the project's `subprojects` a `slug`, `title`, `summary` and
-  `content` (a JSON file in `pages/`). The page is published at `/work/<project>/<slug>/` and
-  linked from the card. A page is built from `sections`, each a list of blocks: `text`,
-  `subheading`, `list`, `table`, `flow` and `note`; see `pages/mealsenseai-ml.json`.
-- **Charts:** a page can name a `charts` data file and use `chart` blocks (`line`, `columns`,
-  `rows`, `reliability`). `charts.js` draws them at the reader's screen width in the theme's
-  colours; each also gets a data table. MealSenseAI's chart data is derived from its training
-  evidence; after a new training or evaluation run, regenerate it on Buddy:
+The architecture pages are built from the product repositories, so a model changes there, not here.
 
-  ```bash
-  python3 tools/evidence_charts.py ~/development/mealsenseai/evidence pages/mealsenseai-ml.charts.json
-  ```
-- **Architecture link:** added automatically when a LikeC4 model named after the `slug` is built.
-  To add one, mount the model at `/models/<slug>` in `docker-compose.yml`.
-
-The theme follows the visitor's system setting until they use the switch; their choice is then
-remembered in the browser.
-
-Then rerun `./infrastructure/architecture-site/setup.sh`.
-
-## Edit the models
-
-| Model | Source |
-|---|---|
-| MealSenseAI | `architecture/likec4/` in this repository |
-| CEREBRO | `architecture/likec4/` in the CEREBRO repository |
-
-Preview while editing, on any machine with Node 18+:
+## Set up on Buddy
 
 ```bash
-npx likec4@1.60.0 start architecture/likec4      # live preview in the browser
-npx likec4@1.60.0 validate architecture/likec4   # what the site build checks first
+cd ~ && git clone https://github.com/dizonj-lab/folio.git
+cd ~/folio && ./setup.sh
 ```
 
-## Stop it
+The script:
+
+1. finds the models — MealSenseAI in `MEALSENSE_DIR` (default `~/MealSenseAI`), CEREBRO in
+   `CEREBRO_DIR` (default `~/cerebro`); a missing one is left out rather than failing the site;
+2. on its first run, carries over the address and port the old copy used (from
+   `$MEALSENSE_DIR/infrastructure/architecture-site/.env`), because that is what Cloudflare points at;
+3. stops the old copy's nginx (Compose project `architecture`; containers only, no volumes removed)
+   so this one can take the port;
+4. builds the site with LikeC4 `1.60.0` in a throwaway Node container, then starts nginx and checks
+   `/healthz`.
+
+Settings are saved in `.env` (git-ignored), so later runs need no arguments. To override:
+`MEALSENSE_DIR=… CEREBRO_DIR=… ARCH_BIND=… ARCH_PORT=… ./setup.sh`.
+
+## Update
 
 ```bash
-cd infrastructure/architecture-site && docker compose down
+cd ~/folio && git pull && ./setup.sh
 ```
 
-The built site lives in the `architecture_site` volume and is rebuilt by `setup.sh` at any time.
+Also after a model changes: `git pull` in `~/MealSenseAI` or `~/cerebro` first. nginx keeps serving
+the previous site until the new build is complete.
+
+## Who can reach it
+
+Public, through the Cloudflare Tunnel's hostname `folio.xtangent.ai`, whose service points at this
+site's address and port. Nothing on the router is forwarded. The port is bound to one address
+(`ARCH_BIND`), never `0.0.0.0`, because Docker publishes ports outside UFW. If the port or address
+ever changes, change the tunnel's public hostname to match.
+
+Only what is meant to be public belongs here: no secrets, internal addresses or credentials in
+`portfolio.json`, `pages/` or either model.

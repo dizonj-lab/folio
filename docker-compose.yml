@@ -1,13 +1,17 @@
-# Architecture site on the home server: the LikeC4 models of MealSenseAI and CEREBRO, built to a
-# static site and served by nginx on the LAN. Run ./setup.sh rather than this file directly.
+# The portfolio on the home server: profile, projects, the MealSenseAI data-and-ML page, and the
+# LikeC4 architecture models of MealSenseAI and CEREBRO, built to a static site and served by nginx.
+# Run ./setup.sh rather than this file directly.
 #
-#   http://<buddy>:8095/                 portfolio (content: portfolio.json)
-#   http://<buddy>:8095/mealsenseai/     MealSenseAI model
-#   http://<buddy>:8095/cerebro/         CEREBRO model
+#   /                 portfolio (content: portfolio.json, pages/)
+#   /mealsenseai/     MealSenseAI model (from MEALSENSE_DIR)
+#   /cerebro/         CEREBRO model (from CEREBRO_DIR)
 #
-# Not published through Cloudflare. Docker bypasses UFW for published ports, so the port is bound
-# to the LAN address only (ARCH_BIND), never 0.0.0.0, and is unreachable from outside the house.
-name: architecture
+# Public at https://folio.xtangent.ai through the existing Cloudflare Tunnel, which reaches this
+# address and port. Docker bypasses UFW for published ports, so the port is bound to one address
+# (ARCH_BIND), never 0.0.0.0, and no router port is forwarded.
+#
+# Its own Compose project: it shares no network, container or volume with MealSenseAI or CEREBRO.
+name: folio
 
 x-hardening: &hardening
   security_opt: ["no-new-privileges:true"]
@@ -33,7 +37,7 @@ services:
       - ./render.mjs:/work/render.mjs:ro
       - ./portfolio.json:/work/portfolio.json:ro
       - ./brand:/work/brand:ro
-      - ${MEALSENSE_MODEL:-../../architecture/likec4}:/models/mealsenseai:ro
+      - ${MEALSENSE_MODEL:-./empty}:/models/mealsenseai:ro
       - ${CEREBRO_MODEL:-./empty}:/models/cerebro:ro
       - site:/site
       - npm-cache:/root/.npm
