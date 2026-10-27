@@ -60,6 +60,21 @@ setkv ARCH_BIND "$BIND"; setkv ARCH_PORT "$PORT"
 setkv MEALSENSE_DIR "$MEALSENSE_DIR"; setkv CEREBRO_DIR "$CEREBRO_DIR"
 setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"
 
+# The CEREBRO demo video: the newest one demo/run.sh made, or DEMO_VIDEO=/path/to/CEREBRO-demo.mp4.
+# Copied into media/ (not committed: it is large) with its subtitles converted to WebVTT for browsers.
+mkdir -p media
+DEMO_VIDEO="${DEMO_VIDEO:-$(ls -t "$HOME"/cerebro-demo-*/CEREBRO-demo.mp4 2>/dev/null | head -1 || true)}"
+if [ -n "$DEMO_VIDEO" ] && [ -f "$DEMO_VIDEO" ]; then
+  echo "==> CEREBRO demo: $DEMO_VIDEO"
+  cmp -s "$DEMO_VIDEO" media/cerebro-demo.mp4 || cp "$DEMO_VIDEO" media/cerebro-demo.mp4
+  SRT="${DEMO_VIDEO%.mp4}.srt"
+  if [ -f "$SRT" ]; then
+    { printf 'WEBVTT\n\n'; sed -E 's/([0-9]{2}:[0-9]{2}:[0-9]{2}),([0-9]{3})/\1.\2/g' "$SRT"; } > media/cerebro-demo.vtt
+  fi
+else
+  echo "-- No CEREBRO demo video found (~/cerebro-demo-*/CEREBRO-demo.mp4); the card has no Watch demo link."
+fi
+
 docker compose --profile build run --rm build
 docker compose up -d --wait web
 curl -fsS "http://$BIND:$PORT/healthz" >/dev/null && echo "==> Portfolio: http://$BIND:$PORT/ (and https://folio.xtangent.ai)"

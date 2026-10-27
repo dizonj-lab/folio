@@ -39,6 +39,8 @@ fi
 # The index is the portfolio: content from portfolio.json (and pages/), rendered into the templates.
 node "$WORK/render.mjs" "$WORK" "$STAGE" "$built" "$VERSION"
 cp -R "$WORK/brand" "$STAGE/brand" && cp "$WORK/site.css" "$WORK/charts.js" "$STAGE/"
+# Demo videos and their subtitles, when setup.sh supplied them.
+if ls "$WORK/media"/* >/dev/null 2>&1; then cp -R "$WORK/media" "$STAGE/media"; fi
 echo "ok" > "$STAGE/healthz"
 
 # Swap in the finished site in one step, so the server never shows a half-built one.

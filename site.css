@@ -223,3 +223,6 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
 .chart summary { cursor: pointer; color: var(--muted); padding: 4px 0; }
 .chart summary:hover { color: var(--accent); }
 .chart details .table { margin-top: 8px; }
+
+/* Demo player page */
+.demo-video { display: block; width: 100%; aspect-ratio: 16 / 9; margin: 8px 0 18px; border-radius: 14px; background: var(--ink); border: 1px solid var(--line); }

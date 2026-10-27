@@ -37,6 +37,7 @@ services:
       - ./render.mjs:/work/render.mjs:ro
       - ./portfolio.json:/work/portfolio.json:ro
       - ./brand:/work/brand:ro
+      - ./media:/work/media:ro
       - ${MEALSENSE_MODEL:-./empty}:/models/mealsenseai:ro
       - ${CEREBRO_MODEL:-./empty}:/models/cerebro:ro
       - site:/site

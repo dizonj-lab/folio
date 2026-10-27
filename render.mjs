@@ -5,7 +5,7 @@
 // marks drawn in dark ink that would vanish on the dark theme. A sub-project's page content lives in
 // its own JSON file (see pages/) and is written to /work/<project>/<sub-project>/. Everything is
 // escaped: the JSON is content, not HTML.
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 
 const [work, stage, builtArg = '', version = ''] = process.argv.slice(2)
@@ -43,8 +43,14 @@ const common = {
   VERSION: esc(version),
 }
 
+// A project's demo video is published only when its file was supplied to this build (setup.sh copies
+// the newest one into media/); without it the card simply has no "Watch demo" link.
+const hasDemo = p => p.demo && existsSync(join(work, p.demo.video))
+const demoHref = p => `/demo/${p.slug}/`
+
 const card = p => {
   const links = [...(p.links ?? [])]
+  if (hasDemo(p)) links.splice(Math.min(1, links.length), 0, { label: 'Watch demo', href: demoHref(p) })
   if (built.has(p.slug)) links.push({ label: 'Architecture', href: `/${p.slug}/` })
   const subs = p.subprojects ?? []
   return `
@@ -157,6 +163,28 @@ writeFileSync(join(stage, 'index.html'), fill('index.template.html', {
   COUNT: String(projects.length),
   PROJECTS: projects.map(card).join(''),
 }))
+
+for (const p of projects.filter(hasDemo)) {
+  const dir = join(stage, 'demo', p.slug)
+  mkdirSync(dir, { recursive: true })
+  writeFileSync(join(dir, 'index.html'), fill('page.template.html', {
+    ...common,
+    PROJECT: esc(p.name),
+    PROJECT_SLUG: esc(p.slug),
+    KICKER: 'Demo',
+    PAGE_TITLE: esc(`${p.name} demo`),
+    SUMMARY: esc(p.demo.summary ?? ''),
+    MARK: mark(p),
+    META: '',
+    STATS: '',
+    SECTIONS: `
+      <video class="demo-video" controls playsinline preload="metadata" src="/${esc(p.demo.video)}#t=1">
+        ${p.demo.captions && existsSync(join(work, p.demo.captions)) ? `<track kind="captions" src="/${esc(p.demo.captions)}" srclang="en" label="English">` : ''}
+      </video>
+      <p class="note">Larkspur Logistics and everything about it are invented. What you see is the real application and real output from local models.</p>`,
+    SCRIPTS: '',
+  }))
+}
 
 for (const p of projects) {
   for (const s of p.subprojects ?? []) {

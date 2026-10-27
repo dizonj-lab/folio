@@ -12,8 +12,7 @@
       "MealSenseAI and CEREBRO were both developed as MVPs during my postgraduate studies in AI Systems at NUS — MealSenseAI applying machine learning, computer vision and conversational AI, CEREBRO knowledge representation and reasoning. Both projects here are self-hosted on my own home server and run their models locally."
     ],
     "links": [
-      { "label": "LinkedIn", "href": "https://www.linkedin.com/in/joselito-dizon" },
-      { "label": "GitHub", "href": "https://github.com/dizonj-lab" }
+      { "label": "LinkedIn", "href": "https://www.linkedin.com/in/joselito-dizon" }
     ]
   },
   "projects": [
@@ -72,6 +71,11 @@
           "content": "pages/cerebro-images.json"
         }
       ],
+      "demo": {
+        "video": "media/cerebro-demo.mp4",
+        "captions": "media/cerebro-demo.vtt",
+        "summary": "A five-minute narrated tour: adding a document, search, the Knowledge Galaxy, the Timeline and Ask CEREBRO, on the documents of a fictional company."
+      },
       "links": [
         { "label": "Open app", "href": "https://cerebro.xtangent.ai" }
       ]

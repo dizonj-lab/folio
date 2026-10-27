@@ -45,6 +45,14 @@ The script:
 Settings are saved in `.env` (git-ignored), so later runs need no arguments. To override:
 `MEALSENSE_DIR=… CEREBRO_DIR=… ARCH_BIND=… ARCH_PORT=… ./setup.sh`.
 
+## The CEREBRO demo video
+
+`setup.sh` publishes the newest `~/cerebro-demo-*/CEREBRO-demo.mp4` (made by CEREBRO's
+`demo/run.sh`), or `DEMO_VIDEO=/path/to/file.mp4`, at `/media/cerebro-demo.mp4` with its
+subtitles as `/media/cerebro-demo.vtt`, and a player page at `/demo/cerebro/`. CEREBRO's card
+then shows "Watch demo". The video is copied into `media/` and never committed. `/media/` is
+served with CORS so CEREBRO's own landing page can play it.
+
 ## Update
 
 ```bash
