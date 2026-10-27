@@ -29,7 +29,7 @@
         "Grounded Meal Advisor on a local LLM via Ollama"
       ],
       "stack": ["Computer vision", "FastAPI", "React", "PostgreSQL", "Ollama"],
-      "status": "Live",
+      "status": "MVP",
       "context": "NUS · AI Systems",
       "subprojects": [
         {
@@ -60,6 +60,7 @@
       "status": "MVP",
       "context": "NUS · AI Systems",
       "links": [
+        { "label": "Open app", "href": "https://cerebro.xtangent.ai" },
         { "label": "Source", "href": "https://github.com/dizonj-lab/cerebro" }
       ]
     }
