@@ -40,7 +40,14 @@
       ],
       "links": [
         { "label": "Open app", "href": "https://mealsense.xtangent.ai" }
-      ]
+      ],
+      "demo": {
+        "video": "media/mealsenseai-demo.mp4",
+        "captions": "media/mealsenseai-demo.vtt",
+        "credits": "media/mealsenseai-demo-photo-credits.md",
+        "summary": "A five-minute narrated tour: why unlabelled meals are the gap in diabetes self-care, then one hawker lunch from photo to portions, glucose impact, a portion and walking what-if, and the Meal Advisor.",
+        "note": "Wei Ming and his meals are fictional. What you see is the real application and its real output. Educational estimates only, not medical advice."
+      }
     },
     {
       "slug": "cerebro",
@@ -74,7 +81,8 @@
       "demo": {
         "video": "media/cerebro-demo.mp4",
         "captions": "media/cerebro-demo.vtt",
-        "summary": "A five-minute narrated tour: adding a document, search, the Knowledge Galaxy, the Timeline and Ask CEREBRO, on the documents of a fictional company."
+        "summary": "A five-minute narrated tour: adding a document, search, the Knowledge Galaxy, the Timeline and Ask CEREBRO, on the documents of a fictional company.",
+        "note": "Larkspur Logistics and everything about it are invented. What you see is the real application and real output from local models."
       },
       "links": [
         { "label": "Open app", "href": "https://cerebro.xtangent.ai" }

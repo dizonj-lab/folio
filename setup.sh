@@ -60,20 +60,27 @@ setkv ARCH_BIND "$BIND"; setkv ARCH_PORT "$PORT"
 setkv MEALSENSE_DIR "$MEALSENSE_DIR"; setkv CEREBRO_DIR "$CEREBRO_DIR"
 setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"
 
-# The CEREBRO demo video: the newest one demo/run.sh made, or DEMO_VIDEO=/path/to/CEREBRO-demo.mp4.
-# Copied into media/ (not committed: it is large) with its subtitles converted to WebVTT for browsers.
+# The demo videos: the newest one each product's demo/run.sh made, or DEMO_VIDEO=… / MEALSENSE_DEMO_VIDEO=….
+# Copied into media/ (not committed: they are large) with subtitles converted to WebVTT for browsers,
+# and photo credits alongside when the video came with them.
 mkdir -p media
-DEMO_VIDEO="${DEMO_VIDEO:-$(ls -t "$HOME"/cerebro-demo-*/CEREBRO-demo.mp4 2>/dev/null | head -1 || true)}"
-if [ -n "$DEMO_VIDEO" ] && [ -f "$DEMO_VIDEO" ]; then
-  echo "==> CEREBRO demo: $DEMO_VIDEO"
-  cmp -s "$DEMO_VIDEO" media/cerebro-demo.mp4 || cp "$DEMO_VIDEO" media/cerebro-demo.mp4
-  SRT="${DEMO_VIDEO%.mp4}.srt"
-  if [ -f "$SRT" ]; then
-    { printf 'WEBVTT\n\n'; sed -E 's/([0-9]{2}:[0-9]{2}:[0-9]{2}),([0-9]{3})/\1.\2/g' "$SRT"; } > media/cerebro-demo.vtt
+publish_demo() {  # $1 name, $2 the video to use (may be empty), $3 slug in media/
+  local video="$2" slug="$3"
+  if [ -z "$video" ] || [ ! -f "$video" ]; then
+    echo "-- No $1 demo video found; its card has no Watch demo link."; return
   fi
-else
-  echo "-- No CEREBRO demo video found (~/cerebro-demo-*/CEREBRO-demo.mp4); the card has no Watch demo link."
-fi
+  echo "==> $1 demo: $video"
+  cmp -s "$video" "media/$slug.mp4" || cp "$video" "media/$slug.mp4"
+  local srt="${video%.mp4}.srt"
+  if [ -f "$srt" ]; then
+    { printf 'WEBVTT\n\n'; sed -E 's/([0-9]{2}:[0-9]{2}:[0-9]{2}),([0-9]{3})/\1.\2/g' "$srt"; } > "media/$slug.vtt"
+  fi
+  local credits; credits="$(dirname "$video")/PHOTO-CREDITS.md"
+  if [ -f "$credits" ]; then cp "$credits" "media/$slug-photo-credits.md"; fi
+}
+newest() { ls -t $1 2>/dev/null | head -1 || true; }
+publish_demo CEREBRO "${DEMO_VIDEO:-$(newest "$HOME/cerebro-demo-*/CEREBRO-demo.mp4")}" cerebro-demo
+publish_demo MealSenseAI "${MEALSENSE_DEMO_VIDEO:-$(newest "$HOME/mealsense-demo-*/MealSenseAI-demo.mp4")}" mealsenseai-demo
 
 docker compose --profile build run --rm build
 docker compose up -d --wait web

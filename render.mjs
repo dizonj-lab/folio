@@ -47,6 +47,16 @@ const common = {
 // the newest one into media/); without it the card simply has no "Watch demo" link.
 const hasDemo = p => p.demo && existsSync(join(work, p.demo.video))
 const demoHref = p => `/demo/${p.slug}/`
+// Photo credits that came with the video (a Markdown list: "- **dish**: [file](url), by …, licence").
+const creditsHtml = p => {
+  const file = p.demo.credits && join(work, p.demo.credits)
+  if (!file || !existsSync(file)) return ''
+  const items = readFileSync(file, 'utf8').split('\n').filter(l => l.startsWith('- ')).map(l => esc(l.slice(2))
+    .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>')
+    .replace(/\[(.+?)\]\((https:\/\/[^)\s]+)\)/g, '<a href="$2" rel="noopener">$1</a>')
+    .replace(/\((https:\/\/[^)\s]+)\)/g, '(<a href="$1" rel="noopener">licence</a>)'))
+  return items.length ? `<details class="note"><summary>Photo credits</summary><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></details>` : ''
+}
 
 const card = p => {
   const links = [...(p.links ?? [])]
@@ -181,7 +191,8 @@ for (const p of projects.filter(hasDemo)) {
       <video class="demo-video" controls playsinline preload="metadata" src="/${esc(p.demo.video)}#t=1">
         ${p.demo.captions && existsSync(join(work, p.demo.captions)) ? `<track kind="captions" src="/${esc(p.demo.captions)}" srclang="en" label="English">` : ''}
       </video>
-      <p class="note">Larkspur Logistics and everything about it are invented. What you see is the real application and real output from local models.</p>`,
+      ${p.demo.note ? `<p class="note">${esc(p.demo.note)}</p>` : ''}
+      ${creditsHtml(p)}`,
     SCRIPTS: '',
   }))
 }
