@@ -6,9 +6,9 @@
 #   /mealsenseai/     MealSenseAI model (from MEALSENSE_DIR)
 #   /cerebro/         CEREBRO model (from CEREBRO_DIR)
 #
-# Public at https://folio.xtangent.ai through the existing Cloudflare Tunnel, which reaches this
-# address and port. Docker bypasses UFW for published ports, so the port is bound to one address
-# (ARCH_BIND), never 0.0.0.0, and no router port is forwarded.
+# Public at https://folio.xtangent.ai through the Cloudflare Tunnel, whose cloudflared runs on this
+# machine and reaches http://127.0.0.1:8095. Docker bypasses UFW for published ports, so the port is
+# bound to loopback (ARCH_BIND), never 0.0.0.0, and no router port is forwarded.
 #
 # Its own Compose project: it shares no network, container or volume with MealSenseAI or CEREBRO.
 name: folio

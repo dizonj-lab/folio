@@ -35,8 +35,8 @@ The script:
 
 1. finds the models — MealSenseAI in `MEALSENSE_DIR` (default `~/MealSenseAI`), CEREBRO in
    `CEREBRO_DIR` (default `~/cerebro`); a missing one is left out rather than failing the site;
-2. on its first run, carries over the address and port the old copy used (from
-   `$MEALSENSE_DIR/infrastructure/architecture-site/.env`), because that is what Cloudflare points at;
+2. serves on `127.0.0.1:8095` (on its first run it carries over the old copy's port, from
+   `$MEALSENSE_DIR/infrastructure/architecture-site/.env`);
 3. stops the old copy's nginx (Compose project `architecture`; containers only, no volumes removed)
    so this one can take the port;
 4. builds the site with LikeC4 `1.60.0` in a throwaway Node container, then starts nginx and checks
@@ -56,10 +56,12 @@ the previous site until the new build is complete.
 
 ## Who can reach it
 
-Public, through the Cloudflare Tunnel's hostname `folio.xtangent.ai`, whose service points at this
-site's address and port. Nothing on the router is forwarded. The port is bound to one address
-(`ARCH_BIND`), never `0.0.0.0`, because Docker publishes ports outside UFW. If the port or address
-ever changes, change the tunnel's public hostname to match.
+Public, through the Cloudflare Tunnel's hostname `folio.xtangent.ai`, whose service is
+`http://127.0.0.1:8095`: cloudflared runs on Buddy itself. The port is bound to loopback
+(`ARCH_BIND`, default `127.0.0.1`), so nothing else on the network reaches it directly and nothing
+on the router is forwarded; never `0.0.0.0`, because Docker publishes ports outside UFW. If the port
+ever changes, change the tunnel's public hostname to match. To look at it from another machine on
+the LAN, use an SSH tunnel (`ssh -L 8095:127.0.0.1:8095 buddy`) rather than widening the binding.
 
 Only what is meant to be public belongs here: no secrets, internal addresses or credentials in
 `portfolio.json`, `pages/` or either model.

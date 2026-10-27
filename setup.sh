@@ -2,7 +2,7 @@
 # Build and serve the portfolio on the home server (run as your normal user).
 #   ./setup.sh                                                   # first time, and to rebuild
 #   MEALSENSE_DIR=~/dev/MealSenseAI CEREBRO_DIR=~/dev/cerebro ./setup.sh
-#   ARCH_BIND=192.168.1.25 ARCH_PORT=8095 ./setup.sh
+#   ARCH_BIND=127.0.0.1 ARCH_PORT=8095 ./setup.sh                # the defaults
 #
 # The portfolio's own content lives in this repository. The two architecture models are read from
 # the product repositories: MealSenseAI from MEALSENSE_DIR (default ~/MealSenseAI) and CEREBRO from
@@ -16,25 +16,24 @@ getkv() { sed -n "s/^$1=//p" "${2:-.env}" | tail -1; }
 
 MEALSENSE_DIR="${MEALSENSE_DIR:-$(getkv MEALSENSE_DIR)}"; MEALSENSE_DIR="${MEALSENSE_DIR:-$HOME/MealSenseAI}"
 
-# The site used to live inside MealSenseAI as the `architecture` Compose project. Its address and
-# port are what Cloudflare points at, so a first run here carries them over unchanged.
+# The site used to live inside MealSenseAI as the `architecture` Compose project. A first run here
+# carries over its port; the address stays loopback.
 OLD_ENV="$MEALSENSE_DIR/infrastructure/architecture-site/.env"
 if [ ! -s .env.imported ] && [ -f "$OLD_ENV" ]; then
-  for key in ARCH_BIND ARCH_PORT CEREBRO_DIR; do
+  for key in ARCH_PORT CEREBRO_DIR; do
     value="$(getkv "$key" "$OLD_ENV")"
     [ -n "$value" ] && [ -z "$(getkv "$key")" ] && setkv "$key" "$value"
   done
   echo "$OLD_ENV" > .env.imported
-  echo "==> Carried over the address and port from $OLD_ENV"
+  echo "==> Carried over the port from $OLD_ENV"
 fi
 
-# The LAN address: an explicit value wins, then the saved one, then the address of the default route.
-lan_ip="$(ip -o -4 route get 1.1.1.1 2>/dev/null | sed -n 's/.* src \([0-9.]*\).*/\1/p')"
-BIND="${ARCH_BIND:-$(getkv ARCH_BIND)}"; BIND="${BIND:-$lan_ip}"
+# The loopback address by default: cloudflared runs on this machine and reaches the site there, so
+# nothing else on the network can. An explicit value wins, then the saved one.
+BIND="${ARCH_BIND:-$(getkv ARCH_BIND)}"; BIND="${BIND:-127.0.0.1}"
 PORT="${ARCH_PORT:-$(getkv ARCH_PORT)}"; PORT="${PORT:-8095}"
 CEREBRO_DIR="${CEREBRO_DIR:-$(getkv CEREBRO_DIR)}"; CEREBRO_DIR="${CEREBRO_DIR:-$HOME/cerebro}"
-[ -n "$BIND" ] || { echo "Could not work out the LAN address; run again with ARCH_BIND=192.168.x.y"; exit 1; }
-case "$BIND" in 0.0.0.0|::) echo "Refusing to bind to every interface; use the LAN address."; exit 1;; esac
+case "$BIND" in 0.0.0.0|::) echo "Refusing to bind to every interface; use 127.0.0.1 or one address."; exit 1;; esac
 
 # The old copy inside MealSenseAI holds the same port. Stop it (containers only; its volumes are
 # kept) so this one can take over.
