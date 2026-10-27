@@ -47,10 +47,12 @@ READABLE = {
     "talk.politics.mideast": "Mideast politics", "talk.politics.misc": "Politics (other)",
     "talk.religion.misc": "Religion (other)",
 }
-# Three groups and "Other": a scatter can carry three categorical colours legibly, not twenty.
+# Four families and "Other": twenty topic colours could not be told apart. The four colours are
+# the palette's only four-slot set that passes every all-pairs check in both themes, and each
+# cluster is also outlined and named, so colour is never the only cue.
 GROUP = {
-    "comp": "Computers", "rec": "Recreation and sport", "talk": "Religion and politics",
-    "alt": "Religion and politics", "soc": "Religion and politics",
+    "comp": "Computers", "rec": "Recreation and sport", "sci": "Science",
+    "talk": "Religion and politics", "alt": "Religion and politics", "soc": "Religion and politics",
 }
 SYSTEMS = {
     "keyword": "Keyword (Postgres, as shipped)", "bm25": "BM25 keyword (reference)",
@@ -200,7 +202,7 @@ data["galaxy_edges"] = [{"a": READABLE.get(e["a"], e["a"]), "b": READABLE.get(e[
                         for e in rule["edges"]]
 proj = des["topics/projection.json"]
 group_of = [GROUP.get(n.split(".")[0], "Other") for n in names]
-groups = ["Computers", "Recreation and sport", "Religion and politics", "Other"]
+groups = ["Computers", "Recreation and sport", "Science", "Religion and politics", "Other"]
 data["pca"] = {
     "groups": groups,
     "points": [[round(x, 3), round(y, 3), groups.index(group_of[label])]

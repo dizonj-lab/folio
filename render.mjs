@@ -92,12 +92,12 @@ const shaped = (b, data) => {
   let spec, legend = [], head, rows
   if (b.kind === 'heatmap') {
     spec = { kind: 'heatmap', title: b.title, labels: d.labels, matrix: d.matrix, counts: d.counts, format: f,
-      domain: b.domain, scale: b.scale, rowTitle: b.rowTitle, colTitle: b.colTitle, legendNote: b.legendNote }
+      domain: b.domain, scale: b.scale, labelMin: b.labelMin, rowTitle: b.rowTitle, colTitle: b.colTitle, legendNote: b.legendNote }
     head = ['', ...d.labels]
     rows = d.labels.map((l, i) => [l, ...d.matrix[i].map(v => fmts[f](v))])
   } else if (b.kind === 'scatter') {
     spec = { kind: 'scatter', title: b.title, points: d.points, groups: d.groups, xTitle: b.xTitle }
-    legend = d.groups.map((g, i) => [i === 3 ? 'other' : `s${i + 1}`, g])
+    legend = d.groups.map((g, i) => [i === d.groups.length - 1 ? 'other' : `c${i + 1}`, g])
   } else {
     spec = { kind: 'xy', title: b.title, series: d.series, xTitle: b.xTitle, yTitle: b.yTitle, diagonal: b.diagonal }
     legend = d.series.map((s, i) => [`s${i + 1}`, s.label])

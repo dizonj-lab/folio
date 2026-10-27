@@ -176,9 +176,14 @@
     },
   }
 
-  // A matrix on one sequential ramp (7 steps, light → dark on the light theme and the reverse on
-  // dark, so "near zero" always recedes toward the surface). Labels name rows on the left and
-  // columns along the top; the exact value is in the tooltip and the data table.
+  // A matrix on one continuous blue gradient. The fill is mixed in CSS from three theme tokens
+  // (--heat-lo/-mid/-hi), so the theme switch recolours it without a redraw, and "near zero" stays a
+  // visible tint in both themes rather than fading to the surface or to black. Where a cell is big
+  // enough, values at or above `labelMin` are printed in it; text uses ink tokens, never a series hue.
+  let gradients = 0
+  const heatFill = t => t <= 0.5
+    ? `color-mix(in oklab, var(--heat-mid) ${Math.round(t * 200)}%, var(--heat-lo))`
+    : `color-mix(in oklab, var(--heat-hi) ${Math.round((t - 0.5) * 200)}%, var(--heat-mid))`
   draw.heatmap = (host, s, W) => {
     const n = s.labels.length, lw = Math.min(118, W * 0.3)
     const cell = Math.max(6, Math.floor((W - lw - 8) / n))
@@ -186,7 +191,7 @@
     const cols = cell >= 14, top = cols ? Math.min(104, 26 + lw * 0.62) : 8, H = top + n * cell + 52
     const svg = el('svg', { width: W, height: H, role: 'img', 'aria-label': s.title })
     const [lo, hi] = s.domain, curve = s.scale === 'sqrt' ? Math.sqrt : v => v
-    const step = v => Math.max(1, Math.min(7, 1 + Math.floor(curve(Math.max(0, (v - lo) / (hi - lo))) * 7)))
+    const at = v => Math.max(0, Math.min(1, curve(Math.max(0, (v - lo) / (hi - lo)))))
     const tip = tooltip(host)
     s.labels.forEach((l, i) => {
       text(svg, lw - 6, top + i * cell + cell / 2 + 4, l, 'tick', 'end')
@@ -195,25 +200,35 @@
       t.setAttribute('transform', `translate(${lw + i * cell + cell / 2 + 3},${top - 6}) rotate(-60)`)
     })
     s.matrix.forEach((row, i) => row.forEach((v, j) => {
-      const r = el('rect', { x: lw + j * cell, y: top + i * cell, width: cell - 1, height: cell - 1, rx: 1.5, class: `heat h${step(v)}`, tabindex: 0 }, svg)
+      const t = at(v)
+      const r = el('rect', { x: lw + j * cell, y: top + i * cell, width: cell - 1, height: cell - 1, rx: 2, class: 'heat', style: `fill:${heatFill(t)}`, tabindex: 0 }, svg)
+      if (s.labelMin != null && cell >= 24 && v >= s.labelMin) {
+        const label = s.format === 'pct' ? Math.round(v * 100) : v.toFixed(2)
+        text(svg, lw + j * cell + (cell - 1) / 2, top + i * cell + cell / 2 + 3.5, String(label), t > 0.62 ? 'heat-label strong' : 'heat-label', 'middle')
+      }
       const show = () => tip.show(lw + j * cell + cell / 2, top + i * cell, `${s.rowTitle}: ${s.labels[i]}`,
         [[`${s.colTitle}: ${s.labels[j]}`, fmt[s.format](v), 0], ...(s.counts ? [['posts', fmt.num(s.counts[i][j]), 0]] : [])])
       r.addEventListener('pointerenter', show); r.addEventListener('focus', show)
       r.addEventListener('pointerleave', () => tip.hide()); r.addEventListener('blur', () => tip.hide())
     }))
-    const ly = top + n * cell + 14, sw = Math.min(28, (W - lw) / 10)
+    // The legend is the same gradient, drawn continuously.
+    const id = `heat-grad-${++gradients}`, ly = top + n * cell + 14, lwid = Math.min(220, W - lw - 70)
+    const grad = el('linearGradient', { id, x1: 0, x2: 1, y1: 0, y2: 0 }, el('defs', {}, svg))
+    for (let k = 0; k <= 10; k++) el('stop', { offset: `${k * 10}%`, style: `stop-color:${heatFill(k / 10)}` }, grad)
     text(svg, lw - 6, ly + 10, fmt[s.format](lo), 'tick', 'end')
-    for (let k = 1; k <= 7; k++) el('rect', { x: lw + (k - 1) * sw, y: ly, width: sw - 1, height: 12, rx: 1.5, class: `heat h${k}` }, svg)
-    text(svg, lw + 7 * sw + 6, ly + 10, fmt[s.format](hi), 'tick')
+    el('rect', { x: lw, y: ly, width: lwid, height: 12, rx: 3, fill: `url(#${id})` }, svg)
+    text(svg, lw + lwid + 6, ly + 10, fmt[s.format](hi), 'tick')
     const note = [s.legendNote, s.scale === 'sqrt' ? 'square-root scale' : ''].filter(Boolean).join(' · ')
     if (note) text(svg, lw, ly + 30, note, 'tick')
     return svg
   }
 
-  // Points on two numeric axes, coloured by group (at most three colours, then "Other" in grey).
+  // Points on two numeric axes, one colour per group and the last group ("Other") in grey. Each
+  // named group is also outlined — an ellipse holding about 86% of its points (two standard
+  // deviations) — and named on the plot, so the clusters are told apart without relying on colour.
   // The tooltip follows the nearest point, so 1,500 dots need no hit target each.
   draw.scatter = (host, s, W) => {
-    const H = Math.min(420, Math.max(280, W * 0.62)), m = { t: 12, r: 12, b: 40, l: 44 }
+    const H = Math.min(440, Math.max(300, W * 0.64)), m = { t: 12, r: 12, b: 40, l: 44 }
     const svg = el('svg', { width: W, height: H, role: 'img', 'aria-label': s.title })
     const xs = s.points.map(p => p[0]), ys = s.points.map(p => p[1])
     const pad = (a, b) => [a - (b - a) * 0.04, b + (b - a) * 0.04]
@@ -226,11 +241,30 @@
       text(svg, x(vx), H - m.b + 18, vx.toFixed(2), 'tick', 'middle')
     }
     text(svg, (m.l + W - m.r) / 2, H - 6, s.xTitle, 'axis-title', 'middle')
-    // "Other" first, so the three named groups sit on top of it.
-    const order = [...s.points.keys()].sort((a, b) => (s.points[b][2] === 3) - (s.points[a][2] === 3))
+    const other = s.groups.length - 1, cls = g => g === other ? 'other' : `c${g + 1}`
+    // Each named group's ellipse, from the covariance of its points in screen space.
+    const shapes = s.groups.slice(0, other).map((name, g) => {
+      const pts = s.points.filter(p => p[2] === g).map(([a, b]) => [x(a), y(b)])
+      const mx = pts.reduce((t, p) => t + p[0], 0) / pts.length, my = pts.reduce((t, p) => t + p[1], 0) / pts.length
+      let sxx = 0, syy = 0, sxy = 0
+      for (const [a, b] of pts) { sxx += (a - mx) ** 2; syy += (b - my) ** 2; sxy += (a - mx) * (b - my) }
+      sxx /= pts.length; syy /= pts.length; sxy /= pts.length
+      const tr = (sxx + syy) / 2, det = Math.sqrt(((sxx - syy) / 2) ** 2 + sxy ** 2)
+      const l1 = tr + det, l2 = Math.max(tr - det, 1e-6), angle = Math.atan2(l1 - sxx, sxy || 1e-9) * 180 / Math.PI
+      return { name, g, mx, my, rx: 2 * Math.sqrt(l1), ry: 2 * Math.sqrt(l2), angle }
+    })
+    for (const e of shapes)
+      el('ellipse', { cx: e.mx, cy: e.my, rx: e.rx, ry: e.ry, transform: `rotate(${e.angle} ${e.mx} ${e.my})`, class: `cluster ${cls(e.g)}` }, svg)
+    // "Other" first, so the named groups sit on top of it.
+    const order = [...s.points.keys()].sort((a, b) => (s.points[b][2] === other) - (s.points[a][2] === other))
     for (const i of order) {
       const [px, py, g] = s.points[i]
-      el('circle', { cx: x(px), cy: y(py), r: 2.6, class: g === 3 ? 'pt other' : `pt s${g + 1}` }, svg)
+      el('circle', { cx: x(px), cy: y(py), r: 2.6, class: `pt ${cls(g)}` }, svg)
+    }
+    // Names on top, at each cluster's centre, with a surface halo so they read over the dots.
+    for (const e of shapes) {
+      const label = text(svg, Math.max(m.l + 40, Math.min(W - m.r - 40, e.mx)), e.my + 4, e.name, 'cluster-label', 'middle')
+      label.setAttribute('paint-order', 'stroke')
     }
     const ring = el('circle', { r: 6, class: 'pt-ring', visibility: 'hidden' }, svg)
     const hit = el('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: 'transparent' }, svg)

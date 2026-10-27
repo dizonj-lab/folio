@@ -129,8 +129,13 @@
   },
   {
    "id": "engineering",
-   "heading": "Data engineering",
+   "heading": "Data engineering · text documents only",
    "blocks": [
+    {
+     "type": "note",
+     "label": "Scope.",
+     "text": "This processing applies to text documents only: PDF, Word (.docx) and PowerPoint (.pptx), plus plain text and Markdown — the formats CEREBRO accepts. Images, audio, video and spreadsheets are not processed. The benchmarks below are text corpora standing in for such documents."
+    },
     {
      "type": "subheading",
      "text": "1 · Cleaning and a leakage audit"
@@ -551,7 +556,7 @@
      "type": "chart",
      "kind": "scatter",
      "title": "The test posts in two dimensions (PCA)",
-     "caption": "1,500 posts, mxbai-embed-large, first two principal components (12.9% of the variance). Coloured by topic family, with the rest in grey.",
+     "caption": "1,500 posts, mxbai-embed-large, first two principal components (12.9% of the variance). Each topic family has its own colour, an outline holding about 86% of its posts, and its name at the centre; the one topic outside them, For sale, is grey.",
      "data": "pca",
      "xTitle": "First principal component",
      "tableData": "pca_groups",
@@ -723,7 +728,7 @@
      "type": "chart",
      "kind": "heatmap",
      "title": "Confusion matrix (trained head)",
-     "caption": "Each row is a true topic, normalised to 100%; the diagonal is what it got right. A square-root colour scale, so mistakes of a few percent still show.",
+     "caption": "Each row is a true topic, normalised to 100%; the diagonal is what it got right, and every cell of 3% or more is labelled. The colour scale is square-root, so mistakes of a few percent still show.",
      "data": "confusion",
      "format": "pct",
      "domain": [
@@ -731,6 +736,7 @@
       1
      ],
      "scale": "sqrt",
+     "labelMin": 0.03,
      "rowTitle": "True topic",
      "colTitle": "Predicted",
      "legendNote": "of the row"

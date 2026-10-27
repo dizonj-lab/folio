@@ -3,7 +3,8 @@
   --bg: #fafaf9; --surface: #ffffff; --ink: #18181b; --muted: #5f5f68; --faint: #8a8a94;
   --line: #e7e5e4; --accent: #0f766e; --accent-soft: #e6f4f1; --chip: #f4f4f5; --tile: #ffffff;
   --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a;
-  --seq-1: #cde2fb; --seq-2: #9ec5f4; --seq-3: #6da7ec; --seq-4: #3987e5; --seq-5: #256abf; --seq-6: #184f95; --seq-7: #0d366b;
+  --heat-lo: #e6effb; --heat-mid: #5598e7; --heat-hi: #0d366b; --heat-ink-strong: #ffffff;
+  --cluster-1: #2a78d6; --cluster-2: #eda100; --cluster-3: #e87ba4; --cluster-4: #008300;
   --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px -12px rgb(0 0 0 / .10);
   color-scheme: light;
 }
@@ -13,7 +14,8 @@
     --bg: #0c0d0f; --surface: #141518; --ink: #ececef; --muted: #a3a3ad; --faint: #75757f;
     --line: #26272c; --accent: #5eead4; --accent-soft: #11302c; --chip: #1c1d21; --tile: #f4f4f5;
     --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
-    --seq-1: #0d366b; --seq-2: #104281; --seq-3: #184f95; --seq-4: #256abf; --seq-5: #3987e5; --seq-6: #6da7ec; --seq-7: #b7d3f6;
+    --heat-lo: #1d2d45; --heat-mid: #2f74cc; --heat-hi: #cde2fb; --heat-ink-strong: #0c0d0f;
+    --cluster-1: #3987e5; --cluster-2: #c98500; --cluster-3: #d55181; --cluster-4: #008300;
     --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
     color-scheme: dark;
   }
@@ -22,7 +24,8 @@
   --bg: #0c0d0f; --surface: #141518; --ink: #ececef; --muted: #a3a3ad; --faint: #75757f;
   --line: #26272c; --accent: #5eead4; --accent-soft: #11302c; --chip: #1c1d21; --tile: #f4f4f5;
   --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70;
-  --seq-1: #0d366b; --seq-2: #104281; --seq-3: #184f95; --seq-4: #256abf; --seq-5: #3987e5; --seq-6: #6da7ec; --seq-7: #b7d3f6;
+  --heat-lo: #1d2d45; --heat-mid: #2f74cc; --heat-hi: #cde2fb; --heat-ink-strong: #0c0d0f;
+  --cluster-1: #3987e5; --cluster-2: #c98500; --cluster-3: #d55181; --cluster-4: #008300;
   --shadow: 0 1px 2px rgb(0 0 0 / .3), 0 8px 24px -12px rgb(0 0 0 / .6);
   color-scheme: dark;
 }
@@ -197,9 +200,17 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
 .plot .pt { stroke: var(--surface); stroke-width: .6; opacity: .85; } .plot .pt.s1 { fill: var(--series-1); }
 .plot .pt.s2 { fill: var(--series-2); } .plot .pt.s3 { fill: var(--series-3); } .plot .pt.other { fill: var(--faint); opacity: .45; }
 .plot .pt-ring { fill: none; stroke: var(--ink); stroke-width: 1.5; pointer-events: none; }
-.plot .heat.h1 { fill: var(--seq-1); } .plot .heat.h2 { fill: var(--seq-2); } .plot .heat.h3 { fill: var(--seq-3); }
-.plot .heat.h4 { fill: var(--seq-4); } .plot .heat.h5 { fill: var(--seq-5); } .plot .heat.h6 { fill: var(--seq-6); }
-.plot .heat.h7 { fill: var(--seq-7); } .plot rect.heat:focus { outline: none; stroke: var(--accent); stroke-width: 1.5; }
+.plot rect.heat:focus { outline: none; stroke: var(--accent); stroke-width: 1.5; }
+.plot .heat-label { fill: var(--ink); font-size: 10px; font-weight: 600; font-variant-numeric: tabular-nums; pointer-events: none; }
+.plot .heat-label.strong { fill: var(--heat-ink-strong); }
+.plot .pt.c1, .legend i.c1 { fill: var(--cluster-1); background: var(--cluster-1); }
+.plot .pt.c2, .legend i.c2 { fill: var(--cluster-2); background: var(--cluster-2); }
+.plot .pt.c3, .legend i.c3 { fill: var(--cluster-3); background: var(--cluster-3); }
+.plot .pt.c4, .legend i.c4 { fill: var(--cluster-4); background: var(--cluster-4); }
+.plot .cluster { stroke-width: 1.5; stroke-dasharray: 5 4; fill-opacity: .07; }
+.plot .cluster.c1 { stroke: var(--cluster-1); fill: var(--cluster-1); } .plot .cluster.c2 { stroke: var(--cluster-2); fill: var(--cluster-2); }
+.plot .cluster.c3 { stroke: var(--cluster-3); fill: var(--cluster-3); } .plot .cluster.c4 { stroke: var(--cluster-4); fill: var(--cluster-4); }
+.plot .cluster-label { fill: var(--ink); font-size: 12px; font-weight: 700; stroke: var(--surface); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 .plot rect[tabindex]:focus, .plot circle[tabindex]:focus { outline: none; stroke: var(--accent); stroke-width: 1.5; }
 .chart-tip { position: absolute; z-index: 2; pointer-events: none; min-width: 140px; padding: 8px 10px; background: var(--surface);
   border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow); font-size: .8rem; }
