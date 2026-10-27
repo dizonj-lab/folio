@@ -176,6 +176,105 @@
     },
   }
 
+  // A matrix on one sequential ramp (7 steps, light → dark on the light theme and the reverse on
+  // dark, so "near zero" always recedes toward the surface). Labels name rows on the left and
+  // columns along the top; the exact value is in the tooltip and the data table.
+  draw.heatmap = (host, s, W) => {
+    const n = s.labels.length, lw = Math.min(118, W * 0.3)
+    const cell = Math.max(6, Math.floor((W - lw - 8) / n))
+    // Column labels need room; on a narrow screen the row labels, tooltip and table carry them.
+    const cols = cell >= 14, top = cols ? Math.min(104, 26 + lw * 0.62) : 8, H = top + n * cell + 52
+    const svg = el('svg', { width: W, height: H, role: 'img', 'aria-label': s.title })
+    const [lo, hi] = s.domain, curve = s.scale === 'sqrt' ? Math.sqrt : v => v
+    const step = v => Math.max(1, Math.min(7, 1 + Math.floor(curve(Math.max(0, (v - lo) / (hi - lo))) * 7)))
+    const tip = tooltip(host)
+    s.labels.forEach((l, i) => {
+      text(svg, lw - 6, top + i * cell + cell / 2 + 4, l, 'tick', 'end')
+      if (!cols) return
+      const t = text(svg, 0, 0, l, 'tick')
+      t.setAttribute('transform', `translate(${lw + i * cell + cell / 2 + 3},${top - 6}) rotate(-60)`)
+    })
+    s.matrix.forEach((row, i) => row.forEach((v, j) => {
+      const r = el('rect', { x: lw + j * cell, y: top + i * cell, width: cell - 1, height: cell - 1, rx: 1.5, class: `heat h${step(v)}`, tabindex: 0 }, svg)
+      const show = () => tip.show(lw + j * cell + cell / 2, top + i * cell, `${s.rowTitle}: ${s.labels[i]}`,
+        [[`${s.colTitle}: ${s.labels[j]}`, fmt[s.format](v), 0], ...(s.counts ? [['posts', fmt.num(s.counts[i][j]), 0]] : [])])
+      r.addEventListener('pointerenter', show); r.addEventListener('focus', show)
+      r.addEventListener('pointerleave', () => tip.hide()); r.addEventListener('blur', () => tip.hide())
+    }))
+    const ly = top + n * cell + 14, sw = Math.min(28, (W - lw) / 10)
+    text(svg, lw - 6, ly + 10, fmt[s.format](lo), 'tick', 'end')
+    for (let k = 1; k <= 7; k++) el('rect', { x: lw + (k - 1) * sw, y: ly, width: sw - 1, height: 12, rx: 1.5, class: `heat h${k}` }, svg)
+    text(svg, lw + 7 * sw + 6, ly + 10, fmt[s.format](hi), 'tick')
+    const note = [s.legendNote, s.scale === 'sqrt' ? 'square-root scale' : ''].filter(Boolean).join(' · ')
+    if (note) text(svg, lw, ly + 30, note, 'tick')
+    return svg
+  }
+
+  // Points on two numeric axes, coloured by group (at most three colours, then "Other" in grey).
+  // The tooltip follows the nearest point, so 1,500 dots need no hit target each.
+  draw.scatter = (host, s, W) => {
+    const H = Math.min(420, Math.max(280, W * 0.62)), m = { t: 12, r: 12, b: 40, l: 44 }
+    const svg = el('svg', { width: W, height: H, role: 'img', 'aria-label': s.title })
+    const xs = s.points.map(p => p[0]), ys = s.points.map(p => p[1])
+    const pad = (a, b) => [a - (b - a) * 0.04, b + (b - a) * 0.04]
+    const [x0, x1] = pad(Math.min(...xs), Math.max(...xs)), [y0, y1] = pad(Math.min(...ys), Math.max(...ys))
+    const x = v => m.l + (W - m.l - m.r) * (v - x0) / (x1 - x0), y = v => m.t + (H - m.t - m.b) * (1 - (v - y0) / (y1 - y0))
+    for (let i = 0; i <= 4; i++) {
+      const vy = y0 + (y1 - y0) * i / 4, vx = x0 + (x1 - x0) * i / 4
+      el('line', { x1: m.l, x2: W - m.r, y1: y(vy), y2: y(vy), class: i ? 'grid' : 'axis' }, svg)
+      text(svg, m.l - 8, y(vy) + 4, vy.toFixed(2), 'tick', 'end')
+      text(svg, x(vx), H - m.b + 18, vx.toFixed(2), 'tick', 'middle')
+    }
+    text(svg, (m.l + W - m.r) / 2, H - 6, s.xTitle, 'axis-title', 'middle')
+    // "Other" first, so the three named groups sit on top of it.
+    const order = [...s.points.keys()].sort((a, b) => (s.points[b][2] === 3) - (s.points[a][2] === 3))
+    for (const i of order) {
+      const [px, py, g] = s.points[i]
+      el('circle', { cx: x(px), cy: y(py), r: 2.6, class: g === 3 ? 'pt other' : `pt s${g + 1}` }, svg)
+    }
+    const ring = el('circle', { r: 6, class: 'pt-ring', visibility: 'hidden' }, svg)
+    const hit = el('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b, fill: 'transparent' }, svg)
+    const tip = tooltip(host)
+    hit.addEventListener('pointermove', e => {
+      let best = 0, d = Infinity
+      s.points.forEach(([px, py], i) => { const dd = (x(px) - e.offsetX) ** 2 + (y(py) - e.offsetY) ** 2; if (dd < d) { d = dd; best = i } })
+      const [px, py, g] = s.points[best]
+      ring.setAttribute('cx', x(px)); ring.setAttribute('cy', y(py)); ring.setAttribute('visibility', 'visible')
+      tip.show(x(px), y(py), s.groups[g], [['PC1', px.toFixed(2), 0], ['PC2', py.toFixed(2), 0]])
+    })
+    hit.addEventListener('pointerleave', () => { ring.setAttribute('visibility', 'hidden'); tip.hide() })
+    return svg
+  }
+
+  // Curves over a 0–1 by 0–1 square (ROC), with the chance diagonal.
+  draw.xy = (host, s, W) => {
+    const H = Math.min(320, Math.max(240, W * 0.55)), m = { t: 16, r: 16, b: 42, l: 44 }
+    const svg = el('svg', { width: W, height: H, role: 'img', 'aria-label': s.title })
+    const x = v => m.l + (W - m.l - m.r) * v, y = v => m.t + (H - m.t - m.b) * (1 - v)
+    for (let i = 0; i <= 4; i++) {
+      const v = i / 4
+      el('line', { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), class: i ? 'grid' : 'axis' }, svg)
+      text(svg, m.l - 8, y(v) + 4, Math.round(v * 100) + '%', 'tick', 'end')
+      text(svg, x(v), H - m.b + 18, Math.round(v * 100) + '%', 'tick', 'middle')
+    }
+    text(svg, (m.l + W - m.r) / 2, H - 6, s.xTitle, 'axis-title', 'middle')
+    if (s.yTitle) text(svg, m.l + 6, m.t + 12, s.yTitle, 'axis-title')
+    el('line', { x1: x(0), y1: y(0), x2: x(1), y2: y(1), class: 'divider' }, svg)
+    text(svg, x(0.62) + 6, y(0.56), s.diagonal ?? 'chance', 'phase')
+    s.series.forEach((ser, k) => el('path', { d: ser.points.map(([a, b], i) => `${i ? 'L' : 'M'}${x(a)},${y(b)}`).join(''), class: `line s${k + 1}` }, svg))
+    const cross = el('line', { y1: m.t, y2: H - m.b, class: 'crosshair', visibility: 'hidden' }, svg)
+    const hit = el('rect', { x: m.l, y: 0, width: W - m.l - m.r, height: H, fill: 'transparent' }, svg)
+    const tip = tooltip(host)
+    hit.addEventListener('pointermove', e => {
+      const fx = Math.max(0, Math.min(1, (e.offsetX - m.l) / (W - m.l - m.r)))
+      cross.setAttribute('x1', x(fx)); cross.setAttribute('x2', x(fx)); cross.setAttribute('visibility', 'visible')
+      const at = ser => ser.points.reduce((b, p) => (Math.abs(p[0] - fx) < Math.abs(b[0] - fx) ? p : b))
+      tip.show(x(fx), m.t + 20, `${s.xTitle} ${fmt.pct(fx)}`, s.series.map((ser, k) => [ser.label, fmt.pct(at(ser)[1]), k + 1]))
+    })
+    hit.addEventListener('pointerleave', () => { cross.setAttribute('visibility', 'hidden'); tip.hide() })
+    return svg
+  }
+
   const plots = [...document.querySelectorAll('.plot[data-chart]')].map(host => ({ host, spec: JSON.parse(host.dataset.chart) }))
   const render = () => plots.forEach(({ host, spec }) => {
     const W = Math.floor(host.clientWidth)

@@ -83,7 +83,38 @@ const blocks = {
 // JavaScript or on hovering.
 const fmts = { pct: v => (v * 100).toFixed(1) + '%', num: v => Math.round(v).toLocaleString('en'), dec: v => v.toFixed(2) }
 const pick = (row, key) => key.includes('{') ? key.replace(/\{(\w+)\}/g, (_, k) => row[k]) : row[key]
+// Matrix, scatter and curve charts take a dataset object rather than rows; their data table comes
+// from the matrix itself or from a companion dataset (`tableData`).
+const shaped = (b, data) => {
+  const d = data[b.data]
+  if (!d) throw new Error(`chart "${b.title}": no dataset "${b.data}" in the charts file`)
+  const f = b.format ?? 'pct'
+  let spec, legend = [], head, rows
+  if (b.kind === 'heatmap') {
+    spec = { kind: 'heatmap', title: b.title, labels: d.labels, matrix: d.matrix, counts: d.counts, format: f,
+      domain: b.domain, scale: b.scale, rowTitle: b.rowTitle, colTitle: b.colTitle, legendNote: b.legendNote }
+    head = ['', ...d.labels]
+    rows = d.labels.map((l, i) => [l, ...d.matrix[i].map(v => fmts[f](v))])
+  } else if (b.kind === 'scatter') {
+    spec = { kind: 'scatter', title: b.title, points: d.points, groups: d.groups, xTitle: b.xTitle }
+    legend = d.groups.map((g, i) => [i === 3 ? 'other' : `s${i + 1}`, g])
+  } else {
+    spec = { kind: 'xy', title: b.title, series: d.series, xTitle: b.xTitle, yTitle: b.yTitle, diagonal: b.diagonal }
+    legend = d.series.map((s, i) => [`s${i + 1}`, s.label])
+  }
+  if (b.tableData) {
+    const t = data[b.tableData]
+    head = b.table.map(c => c.label)
+    rows = t.map(r => b.table.map(c => c.format ? fmts[c.format](r[c.field]) : String(r[c.field])))
+  }
+  return `<figure class="chart">
+          <figcaption><strong>${esc(b.title)}</strong>${b.caption ? `<span>${esc(b.caption)}</span>` : ''}</figcaption>
+          ${legend.length ? `<div class="legend">${legend.map(([c, l]) => `<span><i class="${c}"></i>${esc(l)}</span>`).join('')}</div>` : ''}<div class="plot" data-chart="${esc(JSON.stringify(spec))}"></div>
+          ${rows ? `<details><summary>Data table</summary>${table({ head, rows })}</details>` : ''}
+        </figure>`
+}
 const chart = (b, data) => {
+  if (['heatmap', 'scatter', 'xy'].includes(b.kind)) return shaped(b, data)
   const rows = data[b.data]
   if (!rows) throw new Error(`chart "${b.title}": no dataset "${b.data}" in the charts file`)
   const f = b.format ?? 'num'

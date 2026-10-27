@@ -59,6 +59,14 @@
       "stack": ["Knowledge graphs", "Next.js", "FastAPI", "PostgreSQL", "Kubernetes"],
       "status": "MVP",
       "context": "NUS · AI Systems",
+      "subprojects": [
+        {
+          "slug": "data-and-ml",
+          "title": "Data Engineering, Machine Learning and Model Evaluation",
+          "summary": "Search, topic structure and grounded answering measured on public benchmarks on a self-hosted GPU: nDCG@10 0.731 with the designed models against 0.232 as deployed, a PyTorch topic head at macro-F1 0.733, and an honest look at abstention.",
+          "content": "pages/cerebro-ml.json"
+        }
+      ],
       "links": [
         { "label": "Open app", "href": "https://cerebro.xtangent.ai" },
         { "label": "Source", "href": "https://github.com/dizonj-lab/cerebro" }
