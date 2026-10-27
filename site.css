@@ -103,7 +103,7 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
   
 
 /* Theme switch: shows the moon in light mode and the sun in dark mode. */
-.top-actions { display: flex; align-items: center; gap: 20px; }
+.top-actions { display: flex; align-items: center; gap: 20px; margin-left: auto; }
 .theme-toggle { display: grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid var(--line);
   border-radius: 999px; background: var(--surface); color: var(--muted); cursor: pointer; }
 .theme-toggle:hover { color: var(--ink); border-color: var(--accent); }
