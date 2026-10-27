@@ -1,7 +1,7 @@
 {
  "kicker": "Data engineering · Machine learning · Evaluation",
  "title": "Data Engineering, Machine Learning and Model Evaluation",
- "summary": "Measuring CEREBRO's models on public benchmarks, on a self-hosted GPU, through the product's own code: search, topic structure and grounded answering — for the models the live deployment runs and the ones it was designed for. Search reaches nDCG@10 0.731 with the designed models against 0.232 as deployed; a topic head trained in PyTorch reaches macro-F1 0.733.",
+ "summary": "How well CEREBRO searches, groups topics and answers questions — tested on public benchmarks on my own GPU. With the models it was designed for, search scores 0.73 (nDCG@10), three times what the live setup scores today.",
  "meta": [
   [
    "Technology",
@@ -13,25 +13,25 @@
   ],
   [
    "Benchmarks",
-   "BEIR SciFact · 20 Newsgroups · SQuAD 2.0"
+   "SciFact · 20 Newsgroups · SQuAD 2.0"
   ]
  ],
  "stats": [
   [
-   "0.731",
-   "nDCG@10 search, designed models"
+   "0.73",
+   "search score (nDCG@10)"
   ],
   [
    "3.1×",
-   "search quality vs. as deployed"
+   "better than the live setup"
   ],
   [
-   "0.733",
-   "topic macro-F1, PyTorch head"
+   "0.73",
+   "topic macro-F1"
   ],
   [
    "93%",
-   "answers citing the right paragraph"
+   "answers cite the right source"
   ]
  ],
  "charts": "pages/cerebro-ml.charts.json",
@@ -43,40 +43,35 @@
     {
      "type": "text",
      "paragraphs": [
-      "CEREBRO is a private knowledge store: it turns documents into searchable fragments, links topics into a Galaxy, and answers questions with citations, using models that run locally through Ollama. It trains none of them; what it can be judged on is how well it uses them. This work measures exactly that.",
-      "Three experiments, each on a public benchmark whose labels other people made, run on Buddy's GPU. They drive CEREBRO's own code — its chunker, embedder, keyword query, rank fusion, and Ask CEREBRO's prompt, citation guard and abstention check — so they measure the product rather than a re-implementation of it.",
-      "Each runs twice: with the models the live deployment uses, and with the models it is configured for. Building the evaluation surfaced that the two differ: Buddy's Ollama had no embedding model, so the live site had quietly fallen back to its hashing embedder."
+      "CEREBRO stores your documents, links related topics in a Galaxy, and answers questions with citations — all with models running locally. It doesn't train those models, so the real question is how well it uses them.",
+      "I tested three things on public benchmarks: search, topic grouping, and answering. The tests run CEREBRO's own code, not a copy of it.",
+      "Each test ran twice — once with the models the live site uses, once with the models it was built for. That's how I found the live site had no embedding model and had quietly fallen back to a basic one."
      ]
     },
     {
      "type": "table",
      "head": [
       "",
-      "As deployed",
-      "As designed"
+      "Live setup",
+      "Designed setup"
      ],
      "rows": [
       [
        "Answering model",
-       "llama3.2 (3.2B, Q4_K_M)",
+       "llama3.2 (3.2B)",
        "qwen3"
       ],
       [
        "Embedding model",
-       "none — hashing fallback",
-       "mxbai-embed-large (1,024 dimensions)"
-      ],
-      [
-       "Where",
-       "CEREBRO's Ollama",
-       "A separate Ollama, so the live site never switched"
+       "None — basic hashing fallback",
+       "mxbai-embed-large"
       ]
      ]
     },
     {
      "type": "note",
-     "label": "Why a separate Ollama.",
-     "text": "CEREBRO adopts any embedding model that appears in its Ollama. Switching embedder orphans every stored vector, so the library would drop out of search until re-registered. The designed models were evaluated beside the live system, not inside it."
+     "label": "Why a separate setup.",
+     "text": "Adding an embedding model to the live site would make it re-index everything. So the designed models ran next to it, not inside it."
     }
    ]
   },
@@ -88,33 +83,33 @@
      "type": "table",
      "head": [
       "",
-      "SciFact (BEIR)",
+      "SciFact",
       "20 Newsgroups",
-      "SQuAD 2.0 (dev)"
+      "SQuAD 2.0"
      ],
      "rows": [
       [
-       "Measures",
+       "Tests",
        "Search",
-       "Topic structure and classification",
-       "Grounded answering"
+       "Topics",
+       "Answering"
       ],
       [
        "Size",
-       "5,183 abstracts · 300 claims",
-       "18,846 posts · 20 topics",
-       "100 answerable + 100 unanswerable questions"
+       "5,183 abstracts, 300 questions",
+       "18,846 posts, 20 topics",
+       "200 questions (half unanswerable)"
       ],
       [
-       "Labels",
-       "Expert relevance judgements",
-       "The newsgroup each post was sent to",
-       "Crowd-written answers; unanswerables written to look answerable"
+       "Labelled by",
+       "Scientists",
+       "Where each post was published",
+       "Crowd workers"
       ],
       [
        "Licence",
        "CC BY-NC 2.0",
-       "Public research use",
+       "Research use",
        "CC BY-SA 4.0"
       ]
      ]
@@ -122,7 +117,7 @@
     {
      "type": "text",
      "paragraphs": [
-      "Public benchmarks rather than the owner's library: no private document appears in a report, and nothing can be tuned to agree with itself. 20 Newsgroups is split by posting date, so every test post is later than every training post."
+      "Public data, labelled by other people — so no private documents, and no way to grade my own homework."
      ]
     }
    ]
@@ -134,16 +129,16 @@
     {
      "type": "note",
      "label": "Scope.",
-     "text": "This processing applies to text documents only: PDF, Word (.docx) and PowerPoint (.pptx), plus plain text and Markdown — the formats CEREBRO accepts. Images, audio, video and spreadsheets are not processed. The benchmarks below are text corpora standing in for such documents."
+     "text": "Covers text documents only: PDF, Word (.docx), PowerPoint (.pptx), plain text and Markdown — the formats CEREBRO accepts. No images, audio, video or spreadsheets."
     },
     {
      "type": "subheading",
-     "text": "1 · Cleaning and a leakage audit"
+     "text": "1 · Cleaning and leak checks"
     },
     {
      "type": "text",
      "paragraphs": [
-      "Headers, signatures and quoted replies were removed first — left in, a classifier learns the sender's address and the newsgroup name in the header, the known leak in this dataset. Then every post that could not teach anything, or that would let the test set see the training set, was taken out."
+      "Email headers, signatures and quoted replies came out first — otherwise a model learns the sender, not the subject. Then I removed empty posts, duplicates, and any test post that copied a training post."
      ]
     },
     {
@@ -189,24 +184,24 @@
     {
      "type": "note",
      "label": "Near-duplicates.",
-     "text": "Exact matching found 9 test posts copied from training; embedding similarity found 83 more — reposts and lightly edited copies. Kept in, they would score as generalisation when they are memory."
+     "text": "Exact matching caught 9 copies. Comparing meaning caught 83 more — reposts and light edits that would have inflated the score."
     },
     {
      "type": "subheading",
-     "text": "2 · Chunking against the model's limit"
+     "text": "2 · Splitting documents to fit the model"
     },
     {
      "type": "text",
      "paragraphs": [
-      "Registration splits documents into fragments that must fit the embedding model's payload — 502 tokens for mxbai-embed-large once its special tokens are reserved. The 5,183 SciFact abstracts became 12,146 fragments, 2.34 per abstract, median 747 characters. The largest estimated at 447 tokens: none needed the fallback.",
-      "Forum posts are less tidy: 18.4% exceeded the limit and went through the embedder's other safeguard — split, embedded in pieces, and averaged — rather than being truncated or refused. Embedding ran at 72 texts a second on the GPU."
+      "Documents are split into chunks the embedding model can read (502 tokens max). 5,183 abstracts became 12,146 chunks; the largest was 447 tokens, so nothing overflowed.",
+      "Forum posts are messier: 18.4% were too long, so CEREBRO split them, embedded each piece and averaged the result — nothing cut off, nothing rejected."
      ]
     },
     {
      "type": "chart",
      "kind": "columns",
-     "title": "Fragment length after chunking",
-     "caption": "SciFact abstracts, in characters. The chunker packs whole sentences up to its budget, so most fragments sit just under it.",
+     "title": "Chunk sizes",
+     "caption": "Characters per chunk. Most fill close to the budget.",
      "data": "fragments",
      "x": "range",
      "xLabel": "Characters",
@@ -214,7 +209,7 @@
      "series": [
       {
        "field": "fragments",
-       "label": "Fragments"
+       "label": "Chunks"
       }
      ]
     }
@@ -227,14 +222,14 @@
     {
      "type": "text",
      "paragraphs": [
-      "For each of 300 scientific claims: does search put the abstracts experts judged relevant near the top? Each abstract is chunked and embedded as registration does, and ranks where its best fragment ranks. CEREBRO's search fuses a keyword ranking and an embedding ranking by Reciprocal Rank Fusion (k = 60)."
+      "300 scientific claims, each with abstracts that experts marked relevant. Does search put those near the top? CEREBRO combines a keyword search with a meaning-based search."
      ]
     },
     {
      "type": "chart",
      "kind": "columns",
-     "title": "CEREBRO's search: as deployed and as designed",
-     "caption": "The same code and fusion; only the embedder differs.",
+     "title": "Live vs designed",
+     "caption": "Same code — only the embedding model changes.",
      "data": "search_shipped",
      "x": "metric",
      "xLabel": "Measure",
@@ -244,19 +239,19 @@
      "series": [
       {
        "field": "deployed",
-       "label": "As deployed (hashing)"
+       "label": "Live (hashing)"
       },
       {
        "field": "designed",
-       "label": "As designed (mxbai-embed-large)"
+       "label": "Designed (mxbai)"
       }
      ]
     },
     {
      "type": "chart",
      "kind": "rows",
-     "title": "nDCG@10 by retrieval method",
-     "caption": "Each component alone, and both fusions. 95% bootstrap intervals in the table.",
+     "title": "Each search method on its own",
+     "caption": "nDCG@10 — higher is better. Full figures in the table.",
      "data": "search",
      "x": "system",
      "xLabel": "Method",
@@ -278,7 +273,7 @@
        "format": "dec"
       },
       {
-       "label": "95% interval",
+       "label": "95% range",
        "field": "ci"
       },
       {
@@ -297,7 +292,7 @@
        "format": "dec"
       },
       {
-       "label": "Claims with no result",
+       "label": "No results",
        "field": "empty"
       },
       {
@@ -308,15 +303,15 @@
     },
     {
      "type": "note",
-     "label": "The keyword half finds almost nothing.",
-     "text": "CEREBRO's keyword search uses PostgreSQL's plainto_tsquery, which requires every word of the query to appear. A claim is a full sentence, so 286 of 300 returned nothing (nDCG@10 0.047). A ranker that lets any word match — BM25 — scores 0.642 on the same text. With a good embedder the fusion barely notices; with the hashing fallback, it is most of what is missing."
+     "label": "Keyword search finds almost nothing.",
+     "text": "It requires every word to match, and these queries are full sentences — 286 of 300 got zero results. A search that lets any word match scored 0.64."
     },
     {
      "type": "table",
      "head": [
-      "Paired comparison (nDCG@10, 300 claims)",
+      "Comparison (nDCG@10)",
       "Difference",
-      "95% interval",
+      "95% range",
       "p"
      ],
      "rows": [
@@ -353,34 +348,34 @@
     {
      "type": "text",
      "paragraphs": [
-      "Is a relevant fragment simply more similar to its claim? With mxbai-embed-large, relevant fragments average a cosine of 0.751 against 0.478 for the rest, and similarity alone separates them with ROC AUC 0.989. The hashing embedder manages 0.781."
+      "Are relevant abstracts simply more similar to the question? With mxbai, yes — they separate almost perfectly (AUC 0.99). The live hashing model manages 0.78."
      ]
     },
     {
      "type": "chart",
      "kind": "columns",
-     "title": "Cosine similarity of relevant and other fragments",
-     "caption": "mxbai-embed-large; each group as a share of itself. The overlap is small but real, which is why there is no fixed 'similar enough' threshold in CEREBRO.",
+     "title": "Similarity: relevant vs not",
+     "caption": "mxbai. Each group shown as a share of itself.",
      "data": "search_hist",
      "x": "range",
-     "xLabel": "Cosine similarity",
+     "xLabel": "Similarity",
      "format": "pct",
      "series": [
       {
        "field": "a",
-       "label": "Judged relevant"
+       "label": "Relevant"
       },
       {
        "field": "b",
-       "label": "Other abstracts"
+       "label": "Not relevant"
       }
      ]
     },
     {
      "type": "chart",
      "kind": "xy",
-     "title": "Separating relevant from irrelevant by similarity alone",
-     "caption": "ROC curve: every possible threshold, from accept-nothing to accept-everything.",
+     "title": "How well similarity alone sorts results",
+     "caption": "ROC curve — the closer to the top-left corner, the better.",
      "data": "search_roc",
      "xTitle": "False-positive rate",
      "yTitle": "True-positive rate",
@@ -390,22 +385,22 @@
   },
   {
    "id": "topics",
-   "heading": "Topic structure and similarity",
+   "heading": "Topics and similarity",
    "blocks": [
     {
      "type": "text",
      "paragraphs": [
-      "The Galaxy groups knowledge by topic and links topics more alike than the library's typical pair. That only works if the embedding space holds subject structure. On 20 Newsgroups, two posts on the same topic average a cosine of 0.552 against 0.416 across topics (ROC AUC 0.844); for the hashing embedder the gap all but vanishes (0.228 against 0.208, AUC 0.535)."
+      "The Galaxy links topics that are more alike than usual. That only works if the model understands subjects. With mxbai, posts on the same topic score 0.55 on average vs 0.42 across topics. The hashing model barely tells them apart (0.23 vs 0.21)."
      ]
     },
     {
      "type": "chart",
      "kind": "columns",
-     "title": "Same-topic and different-topic similarity",
-     "caption": "mxbai-embed-large, 40,000 random pairs of training posts, each group as a share of itself.",
+     "title": "Same topic vs different topics",
+     "caption": "mxbai, 40,000 random pairs of posts.",
      "data": "topic_hist",
      "x": "range",
-     "xLabel": "Cosine similarity",
+     "xLabel": "Similarity",
      "format": "pct",
      "series": [
       {
@@ -421,29 +416,29 @@
     {
      "type": "chart",
      "kind": "xy",
-     "title": "Does similarity tell topics apart?",
-     "caption": "ROC for 'same topic' against 'different topics' by cosine similarity.",
+     "title": "Can similarity tell topics apart?",
+     "caption": "ROC curve for 'same topic or not'.",
      "data": "topic_roc",
      "xTitle": "False-positive rate",
      "yTitle": "True-positive rate",
      "tableData": "similarity_summary",
      "table": [
       {
-       "label": "Embedding",
+       "label": "Model",
        "field": "space"
       },
       {
-       "label": "Same-topic mean",
+       "label": "Same topic",
        "field": "same",
        "format": "dec"
       },
       {
-       "label": "Different-topic mean",
+       "label": "Different",
        "field": "different",
        "format": "dec"
       },
       {
-       "label": "ROC AUC",
+       "label": "AUC",
        "field": "auc",
        "format": "dec"
       },
@@ -456,19 +451,20 @@
     },
     {
      "type": "subheading",
-     "text": "The Galaxy's rule, applied to labelled topics"
+     "text": "The Galaxy's linking rule, put to the test"
     },
     {
      "type": "chart",
      "kind": "heatmap",
-     "title": "Topic-to-topic centroid similarity",
-     "caption": "Each topic's mean vector against every other's. The Galaxy draws a link where a pair sits more than one standard deviation above the typical pair: here 0.762, threshold 0.850.",
+     "title": "How similar each topic is to every other",
+     "caption": "Average similarity between topics. The Galaxy links a pair when it scores above 0.85 (the typical pair is 0.76).",
      "data": "centroids",
      "format": "dec",
      "domain": [
       0.6,
       1.0
      ],
+     "labelMin": 0,
      "rowTitle": "Topic",
      "colTitle": "Against"
     },
@@ -483,80 +479,80 @@
       [
        "Atheism",
        "Religion (other)",
-       "0.982"
+       "0.98"
       ],
       [
        "Christianity",
        "Religion (other)",
-       "0.977"
+       "0.98"
       ],
       [
        "PC hardware",
        "Mac hardware",
-       "0.966"
+       "0.97"
       ],
       [
        "Atheism",
        "Christianity",
-       "0.950"
+       "0.95"
       ],
       [
        "MS Windows",
        "PC hardware",
-       "0.941"
+       "0.94"
       ],
       [
        "MS Windows",
        "X Window",
-       "0.941"
+       "0.94"
       ],
       [
        "Gun politics",
        "Politics (other)",
-       "0.941"
+       "0.94"
       ],
       [
        "Computer graphics",
        "MS Windows",
-       "0.931"
+       "0.93"
       ],
       [
        "Cars",
        "Motorcycles",
-       "0.929"
+       "0.93"
       ],
       [
        "Computer graphics",
        "X Window",
-       "0.926"
+       "0.93"
       ],
       [
        "Atheism",
        "Politics (other)",
-       "0.925"
+       "0.93"
       ],
       [
        "MS Windows",
        "Mac hardware",
-       "0.918"
+       "0.92"
       ]
      ]
     },
     {
      "type": "text",
      "paragraphs": [
-      "Nearly every link it proposes is one a reader would draw: the religion groups, PC and Mac hardware, the Windows family, cars and motorcycles. Nothing about the labels went into the rule — only the vectors — so this is the Galaxy's similarity rule checked against people's judgement."
+      "Nearly every link makes sense to a person — the religion groups, PC and Mac hardware, cars and motorcycles. The rule never saw the labels, so this is a fair check."
      ]
     },
     {
      "type": "subheading",
-     "text": "Projection"
+     "text": "Seeing the clusters"
     },
     {
      "type": "chart",
      "kind": "scatter",
-     "title": "The test posts in two dimensions (PCA)",
-     "caption": "1,500 posts, mxbai-embed-large, first two principal components (12.9% of the variance). Each topic family has its own colour, an outline holding about 86% of its posts, and its name at the centre; the one topic outside them, For sale, is grey.",
+     "title": "Posts in two dimensions (PCA)",
+     "caption": "1,500 posts. Each family is outlined and named; 'For sale' is grey. Two dimensions keep only 12.9% of the detail, so neighbours overlap.",
      "data": "pca",
      "xTitle": "First principal component",
      "tableData": "pca_groups",
@@ -566,7 +562,7 @@
        "field": "group"
       },
       {
-       "label": "Posts shown",
+       "label": "Posts",
        "field": "posts",
        "format": "num"
       },
@@ -579,29 +575,24 @@
     {
      "type": "chart",
      "kind": "columns",
-     "title": "Variance captured by the first components",
-     "caption": "Dense embeddings concentrate meaning; sparse TF-IDF spreads it over thousands of words, so its truncated SVD (the sparse counterpart of PCA) captures little in a few components.",
+     "title": "How much detail a few dimensions keep",
+     "caption": "Embeddings pack meaning into few dimensions; word counts (TF-IDF) spread it thin.",
      "data": "variance",
      "x": "components",
-     "xLabel": "Components",
+     "xLabel": "Dimensions",
      "format": "pct",
      "yMax": 0.6,
      "labels": true,
      "series": [
       {
        "field": "pca",
-       "label": "PCA · mxbai-embed-large"
+       "label": "Embeddings (PCA)"
       },
       {
        "field": "svd",
-       "label": "Truncated SVD · TF-IDF"
+       "label": "Word counts (SVD)"
       }
      ]
-    },
-    {
-     "type": "note",
-     "label": "Reading the picture.",
-     "text": "Two components hold 12.9% of the variance, so the plot shows the broad families separating and the fine topics overlapping; fifty hold 56.5%. The classifiers below use all 1,024 dimensions."
     }
    ]
   },
@@ -612,14 +603,14 @@
     {
      "type": "text",
      "paragraphs": [
-      "How much topic information the representations carry, measured by what can be learned from them. Every model uses the same split: 9,821 posts to fit, 1,092 to choose hyper-parameters and stop training, and the 7,159 audited test posts scored once."
+      "Can a model learn the topic from these representations? Every model got the same data: 9,821 posts to learn from, 1,092 to tune on, and 7,159 held back for the final test."
      ]
     },
     {
      "type": "chart",
      "kind": "rows",
-     "title": "Macro-F1 on the test set",
-     "caption": "Models on mxbai-embed-large, on TF-IDF word weights, and on the hashing embedder, plus qwen3 choosing from the topic list with no training (400-post sample).",
+     "title": "Test results by model",
+     "caption": "Macro-F1 (bar) and accuracy. qwen3 had no training — it just picked from the list.",
      "data": "classifiers",
      "x": "model",
      "xLabel": "Model",
@@ -646,7 +637,7 @@
        "format": "dec"
       },
       {
-       "label": "95% interval",
+       "label": "95% range",
        "field": "f1_ci"
       },
       {
@@ -655,7 +646,7 @@
        "format": "pct"
       },
       {
-       "label": "95% interval",
+       "label": "95% range",
        "field": "accuracy_ci"
       }
      ]
@@ -663,24 +654,24 @@
     {
      "type": "text",
      "paragraphs": [
-      "The embedding does the work: four quite different learners on mxbai-embed-large land within 0.03 of each other, and a nearest-centroid rule with no training at all — the Galaxy's own rule — reaches 0.702. The classical TF-IDF baselines sit just below; on the hashing embedder nothing gets past 0.322."
+      "The embedding does the heavy lifting: four different models on mxbai land within 0.03 of each other. Even the Galaxy's simple no-training rule scores 0.70. On the hashing model, nothing beats 0.32."
      ]
     },
     {
      "type": "subheading",
-     "text": "The trained head"
+     "text": "The trained model"
     },
     {
      "type": "text",
      "paragraphs": [
-      "A two-layer network (535,060 parameters) on frozen embeddings, trained with PyTorch on the GPU: AdamW, cosine learning-rate schedule, label smoothing, early stopping on validation loss. It peaked at epoch 3, stopped at 11, and kept the epoch-3 weights — 0.46 s of training, 72.5 MB of GPU memory. The head is a candidate measured here, not something CEREBRO ships: the product proposes topics from a document's own words and a person approves them."
+      "A small neural network (535,060 parameters) trained in PyTorch on the GPU. Training stopped once it began to overfit and kept the best version (epoch 3). It took 0.46 seconds and 72 MB of GPU memory. It's an experiment — CEREBRO doesn't ship it."
      ]
     },
     {
      "type": "chart",
      "kind": "line",
      "title": "Training and validation loss",
-     "caption": "Validation loss is lowest at epoch 3 while training loss keeps falling; early stopping keeps the epoch-3 weights.",
+     "caption": "Validation loss is lowest at epoch 3, so that version was kept.",
      "data": "curve",
      "x": "epoch",
      "xLabel": "Epoch",
@@ -692,11 +683,11 @@
      "series": [
       {
        "field": "train_loss",
-       "label": "Training loss"
+       "label": "Training"
       },
       {
        "field": "val_loss",
-       "label": "Validation loss"
+       "label": "Validation"
       }
      ]
     },
@@ -704,7 +695,7 @@
      "type": "chart",
      "kind": "line",
      "title": "Training and validation accuracy",
-     "caption": "Validation accuracy keeps creeping up after epoch 3 (81.3% to 82.8%) even as validation loss rises: the head grows more confident on what it gets wrong. Stopping on loss trades that 1.5 points for better-calibrated confidence.",
+     "caption": "Validation accuracy kept inching up (81% → 83%), but the model was getting overconfident. Stopping early traded 1.5 points for more honest confidence.",
      "data": "curve",
      "x": "epoch",
      "xLabel": "Epoch",
@@ -716,19 +707,19 @@
      "series": [
       {
        "field": "train_accuracy",
-       "label": "Training accuracy"
+       "label": "Training"
       },
       {
        "field": "val_accuracy",
-       "label": "Validation accuracy"
+       "label": "Validation"
       }
      ]
     },
     {
      "type": "chart",
      "kind": "heatmap",
-     "title": "Confusion matrix (trained head)",
-     "caption": "Each row is a true topic, normalised to 100%; the diagonal is what it got right, and every cell of 3% or more is labelled. The colour scale is square-root, so mistakes of a few percent still show.",
+     "title": "Confusion matrix",
+     "caption": "Rows are the true topic; numbers are the % of that topic. The diagonal is correct.",
      "data": "confusion",
      "format": "pct",
      "domain": [
@@ -744,8 +735,8 @@
     {
      "type": "chart",
      "kind": "rows",
-     "title": "Most frequent confusions",
-     "caption": "The same pairs the Galaxy links above: topics that really do overlap, not random mistakes.",
+     "title": "Most common mix-ups",
+     "caption": "The same pairs the Galaxy links — topics that genuinely overlap.",
      "data": "confused",
      "x": "{true} → {predicted}",
      "xLabel": "True → predicted",
@@ -753,7 +744,7 @@
      "series": [
       {
        "field": "count",
-       "label": "Test posts"
+       "label": "Posts"
       }
      ],
      "note": {
@@ -765,8 +756,8 @@
     {
      "type": "chart",
      "kind": "rows",
-     "title": "F1 by topic",
-     "caption": "Catch-all groups ('other religion', 'other politics') are hardest: their posts are about the same things as their neighbours'.",
+     "title": "Score by topic",
+     "caption": "Catch-all groups like 'Religion (other)' are hardest.",
      "data": "per_class",
      "x": "topic",
      "xLabel": "Topic",
@@ -781,8 +772,8 @@
     {
      "type": "chart",
      "kind": "reliability",
-     "title": "Confidence calibration (trained head)",
-     "caption": "When the head says 70%, it is right about 70% of the time: expected calibration error 0.009. The random forest, by comparison, is badly under-confident (ECE 0.36).",
+     "title": "Is its confidence honest?",
+     "caption": "When it says 70%, it's right about 70% of the time (calibration error 0.009).",
      "data": "calibration",
      "xField": "confidence",
      "yField": "accuracy",
@@ -791,16 +782,16 @@
      "xTitle": "Model confidence",
      "table": [
       {
-       "label": "Confidence band",
+       "label": "Confidence",
        "field": "bin"
       },
       {
-       "label": "Test posts",
+       "label": "Posts",
        "field": "samples",
        "format": "num"
       },
       {
-       "label": "Mean confidence",
+       "label": "Avg confidence",
        "field": "confidence",
        "format": "pct"
       },
@@ -814,8 +805,8 @@
     {
      "type": "chart",
      "kind": "rows",
-     "title": "What the random forest relies on (TF-IDF)",
-     "caption": "Its most important words, by impurity reduction: readable evidence of what separates the topics.",
+     "title": "Words the random forest relies on",
+     "caption": "Its most useful words for telling topics apart.",
      "data": "forest_words",
      "x": "word",
      "xLabel": "Word",
@@ -830,24 +821,24 @@
     {
      "type": "table",
      "head": [
-      "Local model, no training",
+      "Language model, no training",
       "Accuracy",
       "Macro-F1",
       "Unusable replies",
-      "Median latency"
+      "Speed"
      ],
      "rows": [
       [
        "llama3.2:latest (deployed)",
        "34.5%",
-       "0.343",
+       "0.34",
        "19 of 400",
        "129 ms"
       ],
       [
        "qwen3 (designed)",
        "49.8%",
-       "0.503",
+       "0.50",
        "7 of 400",
        "165 ms"
       ]
@@ -857,19 +848,19 @@
   },
   {
    "id": "answering",
-   "heading": "Grounded answering",
+   "heading": "Answering questions",
    "blocks": [
     {
      "type": "text",
      "paragraphs": [
-      "Ask CEREBRO answers only from passages it retrieved, and must say so when they do not hold the answer. Each SQuAD 2.0 question was given six passages the way Ask CEREBRO gives them — the paragraph it was written against and the five most similar paragraphs of the same article — through the product's own prompt, system role and citation guard."
+      "Ask CEREBRO should answer only from your documents — and say so when they don't have the answer. Each question came with six passages, exactly as Ask CEREBRO would give them."
      ]
     },
     {
      "type": "chart",
      "kind": "columns",
-     "title": "Answerable questions",
-     "caption": "Both models put the answer in the reply about as often (79% and 80%; the intervals overlap). What differs is evidence: qwen3 cites a passage in 96% of replies and the right one in 93%.",
+     "title": "Questions that have an answer",
+     "caption": "Both models find the answer about equally often (79% vs 80%). The difference is citing: qwen3 points to the right source 93% of the time.",
      "data": "answer_compare",
      "x": "metric",
      "xLabel": "Measure",
@@ -879,7 +870,7 @@
      "series": [
       {
        "field": "deployed",
-       "label": "llama3.2 (deployed)"
+       "label": "llama3.2 (live)"
       },
       {
        "field": "designed",
@@ -889,12 +880,12 @@
     },
     {
      "type": "subheading",
-     "text": "Declining when the answer is not there"
+     "text": "Questions with no answer"
     },
     {
      "type": "table",
      "head": [
-      "100 unanswerable questions",
+      "Out of 100",
       "llama3.2",
       "qwen3"
      ],
@@ -918,65 +909,54 @@
     },
     {
      "type": "note",
-     "label": "The weakest result, reported as such.",
-     "text": "Both models usually answer questions the passages cannot — often from general knowledge, sometimes saying the detail is missing and then answering anyway. CEREBRO's own check for a declined answer looks for a handful of exact phrases and misses common ones ('do not specify', 'there is no mention'), so the product under-reports even the declines that happen. The two middle rows use a wider, published rule (in tools/cerebro_evidence_charts.py)."
+     "label": "The weak spot.",
+     "text": "Both models usually answer anyway, often from general knowledge. CEREBRO's own 'no answer' check also misses common phrasings like 'the documents don't specify', so it under-counts."
     },
     {
      "type": "table",
      "head": [
-      "Cost per answer",
+      "Speed",
       "llama3.2",
       "qwen3"
      ],
      "rows": [
       [
-       "Median latency",
-       "0.72 s",
-       "1.33 s"
+       "Typical reply time",
+       "0.7 s",
+       "1.3 s"
       ],
       [
-       "95th-percentile latency",
-       "1.84 s",
-       "2.45 s"
+       "Slowest 5%",
+       "1.8 s",
+       "2.5 s"
       ],
       [
-       "Generation speed (median)",
+       "Generation speed",
        "100 tokens/s",
        "51 tokens/s"
       ],
       [
-       "Reply length (median)",
-       "71 tokens",
-       "70 tokens"
-      ],
-      [
-       "Prompts cut at the 4,096-token context",
+       "Prompts cut off (4,096-token limit)",
        "0",
        "2"
       ]
-     ]
-    },
-    {
-     "type": "text",
-     "paragraphs": [
-      "SQuAD F1 is low for both (0.14 and 0.18) because it scores word overlap with a short span and these are prose replies; it is in the evidence for comparison, not used to judge."
      ]
     }
    ]
   },
   {
    "id": "findings",
-   "heading": "Findings and next steps",
+   "heading": "What to fix next",
    "blocks": [
     {
      "type": "list",
      "ordered": true,
      "items": [
-      "Install the designed embedder. mxbai-embed-large lifts search from nDCG@10 0.232 to 0.731 and recall@100 from 46% to 96%. It needs a planned re-registration of the library, because existing vectors belong to the old embedder.",
-      "Let keyword search match any word. plainto_tsquery's every-word rule returned nothing for 286 of 300 claims; an any-word ranking scored 0.642. It matters most when the embedder is weak.",
-      "Widen the abstention check and strengthen the instruction to decline. Neither model declines reliably, and the product's detector misses the declines that do happen.",
-      "Set the model's context window explicitly. Two qwen3 prompts reached Ollama's 4,096-token default and were cut; CEREBRO does not set it.",
-      "Topic suggestions from embeddings are viable. A nearest-centroid rule with no training reaches macro-F1 0.702; a 0.5-second trained head reaches 0.733 with well-calibrated confidence — candidates to rank suggestions a person still approves."
+      "Install the designed embedding model. Search jumps from 0.23 to 0.73. Needs a planned re-index.",
+      "Let keyword search match any word. Today 286 of 300 full-sentence searches return nothing.",
+      "Teach Ask CEREBRO to say 'I don't know' — and catch it when it does.",
+      "Set the model's context size explicitly. Two long prompts were cut off.",
+      "Topic suggestions from embeddings look ready: 0.70 with no training, 0.73 with a half-second of training."
      ]
     }
    ]
@@ -988,7 +968,7 @@
     {
      "type": "text",
      "paragraphs": [
-      "One command on Buddy runs everything (evaluation/run.sh in the CEREBRO repository) and packs an evidence archive. Every run records the CEREBRO commit, the hardware and library versions, and the SHA-256 of every dataset file, checkpoint and output; every number on this page is derived from those archives by tools/cerebro_evidence_charts.py, which checks each file against its manifest first. The deployed configuration was run twice and produced identical results."
+      "One command on my server runs everything and saves an evidence archive. Every number here comes from those archives, checked file by file against their fingerprints (SHA-256). Running the live setup twice gave identical results."
      ]
     },
     {

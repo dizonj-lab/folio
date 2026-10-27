@@ -203,7 +203,8 @@
       const t = at(v)
       const r = el('rect', { x: lw + j * cell, y: top + i * cell, width: cell - 1, height: cell - 1, rx: 2, class: 'heat', style: `fill:${heatFill(t)}`, tabindex: 0 }, svg)
       if (s.labelMin != null && cell >= 24 && v >= s.labelMin) {
-        const label = s.format === 'pct' ? Math.round(v * 100) : v.toFixed(2)
+        // Two decimals without the leading zero (".98") so similarities fit a small cell.
+        const label = s.format === 'pct' ? Math.round(v * 100) : v.toFixed(2).replace(/^0(?=\.)/, '')
         text(svg, lw + j * cell + (cell - 1) / 2, top + i * cell + cell / 2 + 3.5, String(label), t > 0.62 ? 'heat-label strong' : 'heat-label', 'middle')
       }
       const show = () => tip.show(lw + j * cell + cell / 2, top + i * cell, `${s.rowTitle}: ${s.labels[i]}`,
