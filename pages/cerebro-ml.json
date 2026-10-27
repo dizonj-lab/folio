@@ -1,6 +1,6 @@
 {
  "kicker": "Data engineering · Machine learning · Evaluation",
- "title": "Data Engineering, Machine Learning and Model Evaluation",
+ "title": "Data Engineering, Machine Learning and Model Evaluation · Text documents",
  "summary": "How well CEREBRO searches, groups topics and answers questions — tested on public benchmarks on my own GPU. With the models it was designed for, search scores 0.73 (nDCG@10), three times what the live setup scores today.",
  "meta": [
   [

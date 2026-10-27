@@ -244,8 +244,10 @@
     text(svg, (m.l + W - m.r) / 2, H - 6, s.xTitle, 'axis-title', 'middle')
     const other = s.groups.length - 1, cls = g => g === other ? 'other' : `c${g + 1}`
     // Each named group's ellipse, from the covariance of its points in screen space.
+    // A group of one or two points has no shape to outline; it is still coloured and in the legend.
     const shapes = s.groups.slice(0, other).map((name, g) => {
       const pts = s.points.filter(p => p[2] === g).map(([a, b]) => [x(a), y(b)])
+      if (pts.length < 3) return null
       const mx = pts.reduce((t, p) => t + p[0], 0) / pts.length, my = pts.reduce((t, p) => t + p[1], 0) / pts.length
       let sxx = 0, syy = 0, sxy = 0
       for (const [a, b] of pts) { sxx += (a - mx) ** 2; syy += (b - my) ** 2; sxy += (a - mx) * (b - my) }
@@ -253,9 +255,13 @@
       const tr = (sxx + syy) / 2, det = Math.sqrt(((sxx - syy) / 2) ** 2 + sxy ** 2)
       const l1 = tr + det, l2 = Math.max(tr - det, 1e-6), angle = Math.atan2(l1 - sxx, sxy || 1e-9) * 180 / Math.PI
       return { name, g, mx, my, rx: 2 * Math.sqrt(l1), ry: 2 * Math.sqrt(l2), angle }
-    })
+    }).filter(Boolean)
+    // Outlines stay inside the plot: a small, spread-out group can have an ellipse larger than the axes.
+    const clip = `scatter-clip-${++gradients}`
+    el('rect', { x: m.l, y: m.t, width: W - m.l - m.r, height: H - m.t - m.b }, el('clipPath', { id: clip }, el('defs', {}, svg)))
+    const outlines = el('g', { 'clip-path': `url(#${clip})` }, svg)
     for (const e of shapes)
-      el('ellipse', { cx: e.mx, cy: e.my, rx: e.rx, ry: e.ry, transform: `rotate(${e.angle} ${e.mx} ${e.my})`, class: `cluster ${cls(e.g)}` }, svg)
+      el('ellipse', { cx: e.mx, cy: e.my, rx: e.rx, ry: e.ry, transform: `rotate(${e.angle} ${e.mx} ${e.my})`, class: `cluster ${cls(e.g)}` }, outlines)
     // "Other" first, so the named groups sit on top of it.
     const order = [...s.points.keys()].sort((a, b) => (s.points[b][2] === other) - (s.points[a][2] === other))
     for (const i of order) {

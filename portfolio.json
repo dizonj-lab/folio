@@ -61,9 +61,15 @@
       "subprojects": [
         {
           "slug": "data-and-ml",
-          "title": "Data Engineering, Machine Learning and Model Evaluation",
+          "title": "Data Engineering, Machine Learning and Model Evaluation · Text documents",
           "summary": "Search, topics and answering, tested on public benchmarks on my own GPU. Designed models search 3× better than the live setup (nDCG@10 0.73 vs 0.23).",
           "content": "pages/cerebro-ml.json"
+        },
+        {
+          "slug": "images",
+          "title": "Data Engineering, Machine Learning and Model Evaluation · Images",
+          "summary": "Naming, describing and linking images, tested on 100 ImageNetV2 photos on my own GPU. ResNet-50 is right 71% of the time; the top similar image is relevant 65% of the time — good suggestions, still reviewed by a person.",
+          "content": "pages/cerebro-images.json"
         }
       ],
       "links": [

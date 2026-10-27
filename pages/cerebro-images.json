@@ -1,0 +1,585 @@
+{
+ "kicker": "Data engineering · Machine learning · Evaluation",
+ "title": "Data Engineering, Machine Learning and Model Evaluation · Images",
+ "summary": "Can CEREBRO describe images and find related ones on its own? Tested on 100 ImageNetV2 photos on my own GPU: ResNet-50 names the subject 71% of the time, and similar-image search is right 65% of the time for the top match — useful suggestions, not facts.",
+ "meta": [
+  [
+   "Technology",
+   "Python · PyTorch · torchvision · Florence-2 · scikit-learn"
+  ],
+  [
+   "Environment",
+   "Ubuntu Linux · NVIDIA GeForce RTX 5060 Ti (16 GB VRAM)"
+  ],
+  [
+   "Dataset",
+   "ImageNetV2 (matched frequency) · 100 images"
+  ]
+ ],
+ "stats": [
+  [
+   "71%",
+   "ResNet-50 top-1 accuracy"
+  ],
+  [
+   "89%",
+   "right answer in its top 5"
+  ],
+  [
+   "100/100",
+   "images captioned"
+  ],
+  [
+   "65%",
+   "top similar image judged relevant"
+  ]
+ ],
+ "charts": "pages/cerebro-images.charts.json",
+ "sections": [
+  {
+   "id": "overview",
+   "heading": "Overview",
+   "blocks": [
+    {
+     "type": "note",
+     "label": "Scope.",
+     "text": "Images only (JPEG photographs). Text documents are covered in the other CEREBRO sub-project."
+    },
+    {
+     "type": "text",
+     "paragraphs": [
+      "When an image comes into CEREBRO, AI can suggest what it shows, write a description, and link it to similar images. These tests check how far those suggestions can be trusted.",
+      "The image models are off-the-shelf and ran locally on my GPU; none were trained on these images. Only the small reliability check (below) learns from them."
+     ]
+    },
+    {
+     "type": "table",
+     "head": [
+      "Step",
+      "Model",
+      "What it does"
+     ],
+     "rows": [
+      [
+       "Name the subject",
+       "EfficientNet-B0, ResNet-50",
+       "Picks one of 1,000 everyday categories"
+      ],
+      [
+       "Describe the image",
+       "Florence-2",
+       "Writes a detailed caption"
+      ],
+      [
+       "Find similar images",
+       "ResNet-50 features",
+       "Ranks the 5 most similar images"
+      ],
+      [
+       "Flag shaky answers",
+       "Random forest",
+       "Predicts when the subject guess is wrong"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "data",
+   "heading": "Data preparation",
+   "blocks": [
+    {
+     "type": "text",
+     "paragraphs": [
+      "ImageNetV2 is a fresh test set for ImageNet models — photos the models never saw. I took 100 images, one from each of 100 randomly chosen categories, so no category dominates."
+     ]
+    },
+    {
+     "type": "table",
+     "head": [
+      "Check",
+      "Result"
+     ],
+     "rows": [
+      [
+       "Images",
+       "100"
+      ],
+      [
+       "Categories",
+       "100 (one image each)"
+      ],
+      [
+       "Unique files (by SHA-256)",
+       "100 — no duplicates"
+      ],
+      [
+       "Waiting for human review",
+       "100 — nothing auto-approved"
+      ],
+      [
+       "Dataset fingerprint",
+       "SHA-256 f0c37fdf925916b1…"
+      ]
+     ]
+    },
+    {
+     "type": "subheading",
+     "text": "What CEREBRO reads from the file itself"
+    },
+    {
+     "type": "text",
+     "paragraphs": [
+      "Before any AI runs, CEREBRO records facts it can read directly from the file. These are marked deterministic — no guessing involved — but still wait for review."
+     ]
+    },
+    {
+     "type": "table",
+     "head": [
+      "Field",
+      "Example",
+      "How",
+      "Status"
+     ],
+     "rows": [
+      [
+       "filename",
+       "class_0006_9a2f776880903f0f00c061d8a81f9eca84e560e4.jpeg",
+       "deterministic",
+       "pending"
+      ],
+      [
+       "file_size_bytes",
+       "120147",
+       "deterministic",
+       "pending"
+      ],
+      [
+       "sha256",
+       "d0d76a166ac6b3e2…",
+       "deterministic",
+       "pending"
+      ],
+      [
+       "format",
+       "JPEG",
+       "deterministic",
+       "pending"
+      ],
+      [
+       "width",
+       "333",
+       "deterministic",
+       "pending"
+      ],
+      [
+       "height",
+       "500",
+       "deterministic",
+       "pending"
+      ],
+      [
+       "color_mode",
+       "RGB",
+       "deterministic",
+       "pending"
+      ]
+     ]
+    }
+   ]
+  },
+  {
+   "id": "classification",
+   "heading": "Naming the subject",
+   "blocks": [
+    {
+     "type": "chart",
+     "kind": "columns",
+     "title": "Accuracy on 100 new photos",
+     "caption": "Top-1: its first guess is right. Top-5: the right answer is among its five guesses.",
+     "data": "models",
+     "x": "model",
+     "xLabel": "Model",
+     "format": "pct",
+     "yMax": 1,
+     "labels": true,
+     "series": [
+      {
+       "field": "top1",
+       "label": "Top-1"
+      },
+      {
+       "field": "top5",
+       "label": "Top-5"
+      }
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "rows",
+     "title": "Where the two models agree",
+     "caption": "ResNet-50 got 14 right that EfficientNet missed; the reverse happened once. 28 stumped both.",
+     "data": "agreement",
+     "x": "outcome",
+     "xLabel": "Outcome",
+     "format": "num",
+     "series": [
+      {
+       "field": "images",
+       "label": "Images"
+      }
+     ]
+    },
+    {
+     "type": "table",
+     "head": [
+      "Speed (GPU, per image)",
+      "EfficientNet-B0",
+      "ResNet-50"
+     ],
+     "rows": [
+      [
+       "Typical",
+       "1.9 ms",
+       "2.0 ms"
+      ],
+      [
+       "Slowest 5%",
+       "2.6 ms",
+       "2.1 ms"
+      ],
+      [
+       "Images per second",
+       "475",
+       "491"
+      ],
+      [
+       "Model size",
+       "5.3M parameters",
+       "25.6M parameters"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "paragraphs": [
+      "Both are fast enough to run on every upload. ResNet-50 is the clear pick for accuracy — but even it is wrong about 3 times in 10."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "captions",
+   "heading": "Describing the image",
+   "blocks": [
+    {
+     "type": "text",
+     "paragraphs": [
+      "Florence-2 wrote a caption for all 100 images — typically 86 words. That shows it works, not that it's right: nobody checked the captions for accuracy."
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "columns",
+     "title": "Caption length",
+     "caption": "Words per caption.",
+     "data": "caption_lengths",
+     "x": "range",
+     "xLabel": "Words",
+     "format": "num",
+     "labels": true,
+     "series": [
+      {
+       "field": "images",
+       "label": "Images"
+      }
+     ]
+    },
+    {
+     "type": "note",
+     "label": "Example (unverified).",
+     "text": "Subject guess: stingray (63% score; runners-up: electric ray, cloak, velvet). Caption: “The image shows an underwater scene with a large body of water in the center. The water is clear and there are several fish swimming around in it. On the left side of the image, there is a large black stingray with a long, slender body and a pointed nose. Next…” The stingray matches the label; finer details like the jellyfish and the wooden wall haven't been checked. That's why captions stay suggestions until a person approves them."
+    }
+   ]
+  },
+  {
+   "id": "clusters",
+   "heading": "Grouping similar images",
+   "blocks": [
+    {
+     "type": "chart",
+     "kind": "scatter",
+     "title": "100 images in two dimensions (PCA), grouped by K-Means",
+     "caption": "Two dimensions keep only 10% of the detail. K-Means put 86 of 100 images in one cluster.",
+     "data": "pca",
+     "xTitle": "First principal component",
+     "tableData": "clusters",
+     "table": [
+      {
+       "label": "Cluster",
+       "field": "cluster"
+      },
+      {
+       "label": "Images",
+       "field": "images",
+       "format": "num"
+      },
+      {
+       "label": "Categories",
+       "field": "classes",
+       "format": "num"
+      }
+     ]
+    },
+    {
+     "type": "note",
+     "label": "No real groups.",
+     "text": "Silhouette score -0.10 — below zero means images sit closer to other clusters than their own. With 100 different categories and one image each, there's nothing to group. Automatic clusters shouldn't become Galaxy topics without review."
+    }
+   ]
+  },
+  {
+   "id": "reliability",
+   "heading": "Spotting wrong guesses",
+   "blocks": [
+    {
+     "type": "text",
+     "paragraphs": [
+      "Can we tell when ResNet-50 is likely wrong? A random forest looked only at its confidence scores and predicted right or wrong. Tested with 5-fold cross-validation."
+     ]
+    },
+    {
+     "type": "table",
+     "head": [
+      "",
+      "Flagged right",
+      "Flagged wrong"
+     ],
+     "rows": [
+      [
+       "ResNet-50 right",
+       "65",
+       "6"
+      ],
+      [
+       "ResNet-50 wrong",
+       "15",
+       "14"
+      ]
+     ]
+    },
+    {
+     "type": "text",
+     "paragraphs": [
+      "It's right 79% of the time — better than always saying 'right' (71%). It caught 14 of 29 wrong guesses but let 15 through. Useful for ordering a review queue, not for skipping review."
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "rows",
+     "title": "What gives a wrong guess away",
+     "caption": "A small gap between the top two answers is the strongest warning sign.",
+     "data": "rf_features",
+     "x": "feature",
+     "xLabel": "Signal",
+     "format": "dec",
+     "series": [
+      {
+       "field": "importance",
+       "label": "Importance"
+      }
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "xy",
+     "title": "Telling right from wrong",
+     "caption": "ROC curve — the closer to the top-left, the better.",
+     "data": "roc_rf",
+     "xTitle": "False-positive rate",
+     "yTitle": "True-positive rate",
+     "diagonal": "chance"
+    },
+    {
+     "type": "note",
+     "label": "Exploratory.",
+     "text": "100 images is small, and the 29 wrong cases even smaller. Treat this as a direction, not a result."
+    }
+   ]
+  },
+  {
+   "id": "retrieval",
+   "heading": "Finding related images",
+   "blocks": [
+    {
+     "type": "text",
+     "paragraphs": [
+      "For each image, CEREBRO found the 5 most similar others. I judged all 492 pairs by hand: is this a sensible link? (8 pairs weren't judged.)"
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "columns",
+     "title": "How often a suggested link is relevant",
+     "caption": "The top match is right 65% of the time; by the fifth, 27%.",
+     "data": "relevance_by_rank",
+     "x": "rank",
+     "xLabel": "Neighbour rank",
+     "format": "pct",
+     "yMax": 1,
+     "labels": true,
+     "series": [
+      {
+       "field": "relevant",
+       "label": "Judged relevant"
+      }
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "columns",
+     "title": "Precision at top 1, 3 and 5",
+     "caption": "Each extra suggestion adds more noise.",
+     "data": "precision_at_k",
+     "x": "k",
+     "xLabel": "Suggestions shown",
+     "format": "pct",
+     "yMax": 1,
+     "labels": true,
+     "series": [
+      {
+       "field": "precision",
+       "label": "Precision"
+      }
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "columns",
+     "title": "Similarity score: relevant vs not",
+     "caption": "The two groups overlap a lot, so no single cut-off separates them cleanly.",
+     "data": "similarity_hist",
+     "x": "range",
+     "xLabel": "Cosine similarity",
+     "format": "pct",
+     "series": [
+      {
+       "field": "relevant",
+       "label": "Relevant"
+      },
+      {
+       "field": "not_relevant",
+       "label": "Not relevant"
+      }
+     ]
+    },
+    {
+     "type": "chart",
+     "kind": "xy",
+     "title": "Does a higher score mean a better link?",
+     "caption": "Somewhat — AUC 0.72, where 0.5 is a coin toss and 1.0 is perfect.",
+     "data": "roc_retrieval",
+     "xTitle": "False-positive rate",
+     "yTitle": "True-positive rate",
+     "diagonal": "chance"
+    },
+    {
+     "type": "table",
+     "head": [
+      "Cut-off at 0.23",
+      "Kept",
+      "Dropped"
+     ],
+     "rows": [
+      [
+       "Relevant",
+       "132",
+       "84"
+      ],
+      [
+       "Not relevant",
+       "77",
+       "199"
+      ]
+     ]
+    },
+    {
+     "type": "note",
+     "label": "Exploratory.",
+     "text": "The best cut-off keeps 61% of good links at 63% precision — but it was chosen and tested on the same data, by one judge. It needs a fresh test set before it's trusted."
+    }
+   ]
+  },
+  {
+   "id": "findings",
+   "heading": "What this means for CEREBRO",
+   "blocks": [
+    {
+     "type": "list",
+     "ordered": true,
+     "items": [
+      "Use ResNet-50 to suggest subjects — and keep the top 5, since the right answer is there 89% of the time.",
+      "Treat captions as drafts. They're always produced, never verified.",
+      "Show one or two related images, not five. Relevance drops from 65% to 27% by the fifth.",
+      "Use the confidence check to sort the review queue, not to skip it.",
+      "Don't turn automatic clusters into topics. They didn't find real groups here.",
+      "Re-test with more images and a second judge before relying on any threshold."
+     ]
+    },
+    {
+     "type": "text",
+     "paragraphs": [
+      "In short: AI can propose image knowledge quickly, but a person should approve it — which is exactly how CEREBRO registers knowledge."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "reproducibility",
+   "heading": "Reproducibility",
+   "blocks": [
+    {
+     "type": "text",
+     "paragraphs": [
+      "Every number on this page is recomputed from the per-image evidence files and checked against each experiment's own results before publishing. Fixed random seed (42)."
+     ]
+    },
+    {
+     "type": "table",
+     "head": [
+      "Record",
+      "Value"
+     ],
+     "rows": [
+      [
+       "GPU",
+       "NVIDIA GeForce RTX 5060 Ti"
+      ],
+      [
+       "PyTorch · torchvision · scikit-learn",
+       "2.11.0+cu128 · 0.26.0+cu128 · 1.9.1"
+      ],
+      [
+       "Dataset · ImageNetV2 (matched frequency)",
+       "SHA-256 f0c37fdf925916b1…"
+      ],
+      [
+       "Sample",
+       "100 images, one per class, each hashed (SHA-256)"
+      ],
+      [
+       "Evidence archive",
+       "SHA-256 36238c724b712f6e…"
+      ]
+     ]
+    },
+    {
+     "type": "list",
+     "items": [
+      "Limitations: 100 images; one human judge; 8 pairs unjudged; caption accuracy not checked; thresholds chosen and tested on the same data; results apply to images only."
+     ]
+    }
+   ]
+  }
+ ]
+}
