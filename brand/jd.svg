@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <style>.edge{fill:none;stroke:none}@media (prefers-color-scheme:dark){.edge{stroke:#3f3f46}}</style>
+  <rect width="32" height="32" rx="9" fill="#18181b"/>
+  <rect class="edge" x=".5" y=".5" width="31" height="31" rx="8.5"/>
+  <g fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round">
+    <path d="M10 13v8.5a3 3 0 0 1-5 2.2"/>
+    <path d="M22.5 7.5v15"/>
+    <path d="M22.5 18a4.5 4.5 0 1 1 0-.01"/>
+  </g>
+  <circle cx="10" cy="9" r="1.6" fill="#fff"/>
+  <circle cx="27" cy="22.5" r="1.9" fill="#5eead4"/>
+</svg>

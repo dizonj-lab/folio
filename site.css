@@ -44,6 +44,9 @@ a { color: inherit; }
 .top strong { font-weight: 600; letter-spacing: -.01em; }
 .top .wrap { gap: 16px; }
 .top strong { white-space: nowrap; }
+.top .home { display: inline-flex; align-items: center; gap: 10px; }
+/* The mark is a dark tile; on the dark theme a hairline keeps its edge visible. */
+.top .mark { display: block; width: 26px; height: 26px; border-radius: 7px; box-shadow: 0 0 0 1px var(--line); }
 .top nav { display: flex; gap: 20px; font-size: .9rem; }
 .top nav a { color: var(--muted); text-decoration: none; }
 .top nav a:hover { color: var(--ink); }
