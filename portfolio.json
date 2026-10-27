@@ -40,8 +40,7 @@
         }
       ],
       "links": [
-        { "label": "Open app", "href": "https://mealsense.xtangent.ai" },
-        { "label": "Source", "href": "https://github.com/dizonj-lab/mealsenseai" }
+        { "label": "Open app", "href": "https://mealsense.xtangent.ai" }
       ]
     },
     {
@@ -68,8 +67,7 @@
         }
       ],
       "links": [
-        { "label": "Open app", "href": "https://cerebro.xtangent.ai" },
-        { "label": "Source", "href": "https://github.com/dizonj-lab/cerebro" }
+        { "label": "Open app", "href": "https://cerebro.xtangent.ai" }
       ]
     }
   ]
