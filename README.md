@@ -10,6 +10,7 @@ models of **MealSenseAI** and **CEREBRO**. One static site, served by nginx on B
 | `/work/mealsenseai/data-and-ml/` | MealSenseAI sub-project: data engineering, machine learning, model evaluation, with charts from the training evidence |
 | `/mealsenseai/` | MealSenseAI architecture: landscape, capabilities, product rules, containers, components, Buddy, three flows |
 | `/cerebro/` | CEREBRO architecture: its views, from `architecture/likec4` in the CEREBRO repository |
+| `/nexus/` | NEXUS architecture: its views, from `architecture/likec4` in the NEXUS repository (development in progress) |
 
 It used to live inside the MealSenseAI repository (`infrastructure/architecture-site`); this
 repository carries its history. It is its own Compose project (`folio`) and shares no container,
@@ -34,7 +35,8 @@ cd ~/folio && ./setup.sh
 The script:
 
 1. finds the models — MealSenseAI in `MEALSENSE_DIR` (default `~/MealSenseAI`), CEREBRO in
-   `CEREBRO_DIR` (default `~/cerebro`); a missing one is left out rather than failing the site;
+   `CEREBRO_DIR` (default `~/cerebro`), NEXUS in `NEXUS_DIR` (default `~/nexus`); a missing one is
+   left out rather than failing the site;
 2. serves on `127.0.0.1:8095` (on its first run it carries over the old copy's port, from
    `$MEALSENSE_DIR/infrastructure/architecture-site/.env`);
 3. stops the old copy's nginx (Compose project `architecture`; containers only, no volumes removed)
@@ -60,7 +62,7 @@ and never committed. `/media/` is served with CORS so CEREBRO's own landing page
 cd ~/folio && git pull && ./setup.sh
 ```
 
-Also after a model changes: `git pull` in `~/MealSenseAI` or `~/cerebro` first. nginx keeps serving
+Also after a model changes: `git pull` in `~/MealSenseAI`, `~/cerebro` or `~/nexus` first. nginx keeps serving
 the previous site until the new build is complete.
 
 ## Who can reach it
