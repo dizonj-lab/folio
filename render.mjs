@@ -1,7 +1,6 @@
 // Render the portfolio from portfolio.json: the index, plus one page per sub-project.
 //   node render.mjs <work dir> <stage dir> "<built slugs>" <likec4 version>
-// A project gets an "Architecture" link only when its LikeC4 model was built this run, so a
-// project can be listed before it has a model. `logoTile: true` sets a logo on a light tile, for
+// Cards are a standard height: a short summary, with the rest behind "Show me more". `logoTile: true` sets a logo on a light tile, for
 // marks drawn in dark ink that would vanish on the dark theme. A sub-project's page content lives in
 // its own JSON file (see pages/) and is written to /work/<project>/<sub-project>/. Everything is
 // escaped: the JSON is content, not HTML.
@@ -27,6 +26,9 @@ const mark = p => p.logo
 // The stored choice is applied before first paint so a dark-mode visitor never sees a white flash.
 // Storage can be unavailable (private windows, blocked site data); the page then follows the system.
 const THEME_SCRIPT = `<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}
+document.documentElement.classList.add('js');
+document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.project .more').forEach(function(m){m.inert=true})});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.more-toggle');if(!b)return;var c=b.closest('.project'),o=!c.classList.contains('open'),m=c.querySelector('.more');c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.firstChild.textContent=o?'Show less':'Show me more';if(m)m.inert=!o});
 function toggleTheme(){var r=document.documentElement,d=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=d==='dark'?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('theme',n)}catch(e){}}</script>`
 const THEME_BUTTON = `<button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark theme" title="Light / dark theme">
           <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -61,7 +63,6 @@ const creditsHtml = p => {
 const card = p => {
   const links = [...(p.links ?? [])]
   if (hasDemo(p)) links.splice(Math.min(1, links.length), 0, { label: 'Watch demo', href: demoHref(p) })
-  if (built.has(p.slug)) links.push({ label: 'Architecture', href: `/${p.slug}/` })
   const subs = p.subprojects ?? []
   return `
       <article class="project" id="${esc(p.slug)}">
@@ -73,10 +74,13 @@ const card = p => {
           </div>
           ${p.status ? `<span class="status">${esc(p.status)}</span>` : ''}
         </header>
-        <p>${esc(p.description)}</p>
-        ${p.highlights?.length ? `<ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
-        ${p.stack?.length ? `<ul class="stack">${p.stack.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
-        ${subs.length ? `<div class="subprojects"><h4>Sub-projects</h4>${subs.map(s => `<a class="subproject" href="${subHref(p, s)}"><div><strong>${esc(s.title)}</strong><span>${esc(s.summary)}</span></div><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div>` : ''}
+        <p class="desc">${esc(p.description)}</p>
+        <div class="more" id="more-${esc(p.slug)}"><div class="more-inner">
+          ${p.highlights?.length ? `<ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
+          ${p.stack?.length ? `<ul class="stack">${p.stack.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
+          ${subs.length ? `<div class="subprojects"><h4>Sub-projects</h4>${subs.map(s => `<a class="subproject" href="${subHref(p, s)}"><div><strong>${esc(s.title)}</strong><span>${esc(s.summary)}</span></div><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div>` : ''}
+        </div></div>
+        <button class="more-toggle" type="button" aria-expanded="false" aria-controls="more-${esc(p.slug)}"><span>Show me more</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
         <footer>
           ${p.context ? `<span class="context">${esc(p.context)}</span>` : '<span></span>'}
           <nav>${links.map(l => link(l)).join('')}</nav>
