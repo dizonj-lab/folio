@@ -92,16 +92,15 @@
       "slug": "nexus",
       "name": "NEXUS",
       "logo": "brand/nexus.svg",
-      "tagline": "Design in plain language. Find the bottleneck before it ships.",
-      "description": "Say what the system should do, then watch it take the load, find where it breaks and prove it is compliant, before anything is built. The architect designs in plain language; a local language model asks what it needs to know and returns an editable plan, and every step is dry-run before it is applied. A resiliency simulator pushes the design to 1,000× load, autoscales what can scale, prices it and names the component that breaks first. Every change is checked against the approved technology stack, enterprise architecture principles and cybersecurity policy, and recorded as a traceable, approved decision.",
+      "tagline": "Architecture workbench grounded in your own standards.",
+      "description": "A self-hosted architecture workbench where architects design cloud, hybrid and on-premises systems grounded in their organisation's own policies, controls and architecture standards. It simulates infrastructure on the fly across AWS, Azure, Google Cloud and on-premises data centres: load and scaling behaviour, what-if analyses (traffic spikes, zone and region outages, failover), resilience-pattern comparisons and cost estimates. AI agents review each design against the ground truth, and an architect approves every change.",
       "highlights": [
-        "Natural-language design: conversation, clarifying questions, and plans the architect edits step by step",
-        "Resiliency simulation to 1,000× load: autoscaling, scale-in, monthly cost and a \"safe up to\" limit that names the bottleneck",
-        "Design governance by rule: every change checked against approved technology, EA principles, cybersecurity policy and MITRE ATT&CK",
-        "Traceability: versioned change ledger, architecture decision records and role-based approval, with the architect always in the loop"
+        "Grounded in ground truth: policies, controls and architecture standards checked by rule",
+        "On-the-fly simulation across AWS, Azure, Google Cloud and on-premises: load, scaling, outages, failover and cost",
+        "AI agents review and propose; the architect approves every change"
       ],
-      "stack": ["Local LLM (Ollama)", "Rules engine", "MCP", "LikeC4", "Terraform", "Next.js", "FastAPI", "PostgreSQL"],
-      "status": "Development in progress",
+      "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Ollama (Qwen 2.5 7B)", "Python", "Docker", "nginx"],
+      "status": "Under development",
       "context": "Independent R&D · self-hosted"
     }
   ]

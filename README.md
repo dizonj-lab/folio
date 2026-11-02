@@ -10,7 +10,7 @@ models of **MealSenseAI** and **CEREBRO**. One static site, served by nginx on B
 | `/work/mealsenseai/data-and-ml/` | MealSenseAI sub-project: data engineering, machine learning, model evaluation, with charts from the training evidence |
 | `/mealsenseai/` | MealSenseAI architecture: landscape, capabilities, product rules, containers, components, Buddy, three flows |
 | `/cerebro/` | CEREBRO architecture: its views, from `architecture/likec4` in the CEREBRO repository |
-| `/nexus/` | NEXUS architecture: its views, from `architecture/likec4` in the NEXUS repository (development in progress) |
+| `/nexus/` | NEXUS architecture: its views, from `architecture/likec4` in the NEXUS repository (under development) |
 
 It used to live inside the MealSenseAI repository (`infrastructure/architecture-site`); this
 repository carries its history. It is its own Compose project (`folio`) and shares no container,
