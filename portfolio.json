@@ -87,6 +87,21 @@
       "links": [
         { "label": "Open app", "href": "https://cerebro.xtangent.ai" }
       ]
+    },
+    {
+      "slug": "nexus",
+      "name": "NEXUS",
+      "logo": "brand/nexus.svg",
+      "tagline": "Architecture workbench grounded in your own standards.",
+      "description": "A self-hosted architecture workbench where architects design cloud, hybrid and on-premises systems grounded in their organisation's own policies, controls and architecture standards. It simulates infrastructure on the fly across AWS, Azure, Google Cloud and on-premises data centres: load and scaling behaviour, what-if analyses (traffic spikes, zone and region outages, failover), resilience-pattern comparisons and cost estimates. AI agents review each design against the ground truth, and an architect approves every change.",
+      "highlights": [
+        "Grounded in ground truth: policies, controls and architecture standards checked by rule",
+        "On-the-fly simulation across AWS, Azure, Google Cloud and on-premises: load, scaling, outages, failover and cost",
+        "AI agents review and propose; the architect approves every change"
+      ],
+      "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Ollama (Qwen 2.5 7B)", "Python", "Docker", "nginx"],
+      "status": "Under development",
+      "context": "Independent R&D · self-hosted"
     }
   ]
 }

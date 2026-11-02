@@ -33,6 +33,7 @@ fi
 BIND="${ARCH_BIND:-$(getkv ARCH_BIND)}"; BIND="${BIND:-127.0.0.1}"
 PORT="${ARCH_PORT:-$(getkv ARCH_PORT)}"; PORT="${PORT:-8095}"
 CEREBRO_DIR="${CEREBRO_DIR:-$(getkv CEREBRO_DIR)}"; CEREBRO_DIR="${CEREBRO_DIR:-$HOME/cerebro}"
+NEXUS_DIR="${NEXUS_DIR:-$(getkv NEXUS_DIR)}"; NEXUS_DIR="${NEXUS_DIR:-$HOME/nexus}"
 case "$BIND" in 0.0.0.0|::) echo "Refusing to bind to every interface; use 127.0.0.1 or one address."; exit 1;; esac
 
 # The old copy inside MealSenseAI holds the same port. Stop it (containers only; its volumes are
@@ -55,10 +56,11 @@ model() {  # $1 name, $2 path: the model's directory, or ./empty when it is not 
 MEALSENSE_MODEL="$(model MealSenseAI "$MEALSENSE_DIR/architecture/likec4")"
 CEREBRO_MODEL="$(model CEREBRO "$CEREBRO_DIR/architecture/likec4")"
 [ "$CEREBRO_MODEL" = "$(pwd)/empty" ] && echo "   CEREBRO's model is on the cerebro-mvp branch and the branches after it."
+NEXUS_MODEL="$(model NEXUS "$NEXUS_DIR/architecture/likec4")"
 
 setkv ARCH_BIND "$BIND"; setkv ARCH_PORT "$PORT"
-setkv MEALSENSE_DIR "$MEALSENSE_DIR"; setkv CEREBRO_DIR "$CEREBRO_DIR"
-setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"
+setkv MEALSENSE_DIR "$MEALSENSE_DIR"; setkv CEREBRO_DIR "$CEREBRO_DIR"; setkv NEXUS_DIR "$NEXUS_DIR"
+setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"; setkv NEXUS_MODEL "$NEXUS_MODEL"
 
 # The demo videos: the newest one each product's demo/run.sh made, or DEMO_VIDEO=… / MEALSENSE_DEMO_VIDEO=….
 # Copied into media/ (not committed: they are large) with subtitles converted to WebVTT for browsers,
