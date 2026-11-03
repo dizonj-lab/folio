@@ -109,8 +109,10 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
   display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }
 .context { color: var(--faint); font-size: .82rem; }
 .project nav { display: flex; flex-wrap: wrap; gap: 16px; font-size: .9rem; font-weight: 550; }
-.project nav a { color: var(--accent); text-decoration: none; }
-.project nav a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.project nav { gap: 8px; }
+.project nav a { display: inline-flex; align-items: center; padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
+  color: var(--accent); font-size: .85rem; font-weight: 550; text-decoration: none; transition: border-color .15s; }
+.project nav a:hover, .project nav a:focus-visible { border-color: var(--accent); }
 
 .contact p { margin: 0 0 20px; color: var(--muted); max-width: 60ch; }
 .site-foot { padding-top: 32px; padding-bottom: 48px; border-top: 1px solid var(--line); color: var(--faint); font-size: .8rem;

@@ -37,6 +37,9 @@ for dir in "${SITES_DIR:-/sites}"/*; do
   name="$(basename "$dir")"
   echo "==> $name: static site"
   rm -rf "$STAGE/$name" && cp -R "$dir" "$STAGE/$name"
+  # Stamp its asset URLs too, so a rebuild is never hidden behind a cached copy.
+  stamp="$(date +%s)"
+  sed -i -E "s#(href|src)=\"(/feedback\.(css|js)|[a-z0-9_-]+\.(css|js))\"#\1=\"\2?v=$stamp\"#g" "$STAGE/$name/index.html"
   built="$built $name"
 done
 

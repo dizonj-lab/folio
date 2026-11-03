@@ -17,7 +17,11 @@ const link = ({ label, href }, cls = '') =>
   `<a${cls ? ` class="${cls}"` : ''} href="${esc(href)}"${external(href) ? ' target="_blank" rel="noopener"' : ''}>${esc(label)}</a>`
 const initials = name => esc(name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())
 const subHref = (p, s) => `/work/${p.slug}/${s.slug}/`
+// Asset URLs carry a build stamp, so browsers and Cloudflare fetch the new CSS and JS after every
+// rebuild instead of serving a cached copy.
+const BUILD = Date.now().toString(36)
 const fill = (template, values) => readFileSync(join(work, template), 'utf8').replace(/\{\{(\w+)\}\}/g, (m, k) => values[k] ?? m)
+  .replace(/(href|src)="(\/(?:site\.css|feedback\.css|feedback\.js|charts\.js))"/g, `$1="$2?v=${BUILD}"`)
 
 const mark = p => p.logo
   ? `<img class="mark${p.logoTile ? ' mark-tile' : ''}" src="/${esc(p.logo)}" alt="" width="56" height="56">`
@@ -223,7 +227,7 @@ for (const p of projects) {
       META: page.meta?.length ? `<dl class="meta">${page.meta.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>` : '',
       STATS: page.stats?.length ? `<div class="stats">${page.stats.map(([v, l]) => `<div class="stat"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>` : '',
       SECTIONS: (page.sections ?? []).map((sec, i) => section(sec, i, data)).join(''),
-      SCRIPTS: page.charts ? '<script src="/charts.js" defer></script>' : '',
+      SCRIPTS: page.charts ? `<script src="/charts.js?v=${BUILD}" defer></script>` : '',
     }))
   }
 }
