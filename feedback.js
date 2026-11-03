@@ -1,4 +1,4 @@
-// Feedback icons for every project: thumbs up, thumbs down, suggest a feature, give feedback, open
+// Feedback icons for every project: learn more (data-info), thumbs up, thumbs down, suggest a feature, give feedback, open
 // the demo. Put <div class="fb" data-app="nexus" data-name="NEXUS" data-demo="/nexus/#demo"></div>
 // on a page that loads /feedback.css and /feedback.js; responses go to the feedback hub (/api/feedback/).
 (function () {
@@ -19,6 +19,7 @@
     idea: svg('<path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.1 14c.2-1 .7-1.7 1.4-2.5A6 6 0 1 0 6 8c0 1.3.5 2.4 1.5 3.5.7.8 1.2 1.5 1.4 2.5"/>'),
     feedback: svg('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
     demo: svg('<circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4z"/>'),
+    info: svg('<circle cx="12" cy="12" r="10"/><path d="M12 16v-5"/><path d="M12 8h.01"/>'),
   };
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
@@ -92,9 +93,10 @@
   }
 
   function mount(el) {
-    const app = el.dataset.app, name = el.dataset.name || app, demo = el.dataset.demo;
+    const app = el.dataset.app, name = el.dataset.name || app, demo = el.dataset.demo, info = el.dataset.info;
     const b = (k, tip, extra = '') => `<button type="button" class="fb-i" data-k="${k}" aria-label="${esc(tip)}" data-tip="${esc(tip)}" ${extra}>${ICON[k]}</button>`;
-    el.innerHTML = b('up', 'I like this', 'aria-pressed="false"') + b('down', 'Not for me', 'aria-pressed="false"')
+    el.innerHTML = (info ? `<a class="fb-i" href="${esc(info)}" aria-label="Learn more about ${esc(name)}" data-tip="Learn more">${ICON.info}</a>` : '')
+      + b('up', 'I like this', 'aria-pressed="false"') + b('down', 'Not for me', 'aria-pressed="false"')
       + b('idea', 'Suggest a feature') + b('feedback', 'Give feedback')
       + (demo ? `<a class="fb-i" href="${esc(demo)}" aria-label="Open the demo" data-tip="Open the demo">${ICON.demo}</a>` : '');
     el.setAttribute('role', 'group');

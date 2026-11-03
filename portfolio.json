@@ -102,10 +102,8 @@
       "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Local SLM (Qwen 2.5 7B)", "LLM second opinion", "Python", "Docker", "nginx"],
       "status": "Under development",
       "context": "Independent R&D",
-      "links": [
-        { "label": "Learn more", "href": "/nexus/" },
-        { "label": "Watch demo", "href": "/nexus/#demo" }
-      ]
+      "learnMore": "/nexus/",
+      "demoUrl": "/nexus/#demo"
     }
   ]
 }
