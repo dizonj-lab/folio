@@ -24,9 +24,12 @@
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 
   async function post(path, body) {
-    const r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    let r;
+    try {
+      r = await fetch(API + path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    } catch (e) { throw new Error('Could not reach the feedback service. Please try again later.'); }
     if (!r.ok) {
-      let msg = 'Sorry, that did not go through. Please try again later.';
+      let msg = `Sorry, that did not go through (error ${r.status}). Please try again later.`;
       try { const j = await r.json(); if (typeof j.detail === 'string') msg = j.detail; } catch (e) {}
       throw new Error(msg);
     }
