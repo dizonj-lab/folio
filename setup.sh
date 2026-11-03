@@ -62,7 +62,8 @@ setkv ARCH_BIND "$BIND"; setkv ARCH_PORT "$PORT"
 setkv MEALSENSE_DIR "$MEALSENSE_DIR"; setkv CEREBRO_DIR "$CEREBRO_DIR"; setkv NEXUS_DIR "$NEXUS_DIR"
 setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"; setkv NEXUS_MODEL "$NEXUS_MODEL"
 
-# The demo videos: the newest one each product's demo/run.sh made, or DEMO_VIDEO=… / MEALSENSE_DEMO_VIDEO=….
+# The demo videos: the newest one each product's demo/run.sh made (NEXUS: landing/media in NEXUS_DIR),
+# or DEMO_VIDEO=… / MEALSENSE_DEMO_VIDEO=… / NEXUS_DEMO_VIDEO=….
 # Copied into media/ (not committed: they are large) with subtitles converted to WebVTT for browsers,
 # and photo credits alongside when the video came with them.
 mkdir -p media
@@ -74,7 +75,8 @@ publish_demo() {  # $1 name, $2 the video to use (may be empty), $3 slug in medi
   echo "==> $1 demo: $video"
   cmp -s "$video" "media/$slug.mp4" || cp "$video" "media/$slug.mp4"
   local srt="${video%.mp4}.srt"
-  if [ -f "$srt" ]; then
+  if [ -f "${video%.mp4}.vtt" ]; then cp "${video%.mp4}.vtt" "media/$slug.vtt"
+  elif [ -f "$srt" ]; then
     { printf 'WEBVTT\n\n'; sed -E 's/([0-9]{2}:[0-9]{2}:[0-9]{2}),([0-9]{3})/\1.\2/g' "$srt"; } > "media/$slug.vtt"
   fi
   local credits; credits="$(dirname "$video")/PHOTO-CREDITS.md"
@@ -83,6 +85,7 @@ publish_demo() {  # $1 name, $2 the video to use (may be empty), $3 slug in medi
 newest() { ls -t $1 2>/dev/null | head -1 || true; }
 publish_demo CEREBRO "${DEMO_VIDEO:-$(newest "$HOME/cerebro-demo-*/CEREBRO-demo.mp4")}" cerebro-demo
 publish_demo MealSenseAI "${MEALSENSE_DEMO_VIDEO:-$(newest "$HOME/mealsense-demo-*/MealSenseAI-demo.mp4")}" mealsenseai-demo
+publish_demo NEXUS "${NEXUS_DEMO_VIDEO:-$NEXUS_DIR/landing/media/nexus-demo.mp4}" nexus-demo
 
 docker compose --profile build run --rm build
 docker compose up -d --wait web
