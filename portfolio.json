@@ -29,7 +29,7 @@
       ],
       "stack": ["Computer vision", "FastAPI", "React", "PostgreSQL", "Ollama"],
       "status": "MVP",
-      "context": "NUS · AI Systems",
+      "context": "Independent R&D",
       "subprojects": [
         {
           "slug": "data-and-ml",
@@ -63,7 +63,7 @@
       ],
       "stack": ["Knowledge graphs", "Next.js", "FastAPI", "PostgreSQL", "Kubernetes"],
       "status": "MVP",
-      "context": "NUS · AI Systems",
+      "context": "Independent R&D",
       "subprojects": [
         {
           "slug": "data-and-ml",
