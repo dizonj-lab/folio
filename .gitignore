@@ -1,3 +1,4 @@
 .env
 .env.imported
 media/
+__pycache__/

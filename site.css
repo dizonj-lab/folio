@@ -91,13 +91,14 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
   transition: grid-template-rows .4s ease, opacity .3s ease, margin-top .4s ease; }
 .js .project.open .more { grid-template-rows: 1fr; opacity: 1; margin-top: 0; }
 .more-toggle { display: none; }
-.js .more-toggle { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; margin-top: auto; padding: 6px 12px;
+.card-actions { margin-top: auto; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px; }
+.project.open .card-actions { margin-top: 0; }
+.js .more-toggle { display: inline-flex; align-self: flex-start; align-items: center; gap: 6px; padding: 6px 12px;
   border: 1px solid var(--line); border-radius: 999px; background: transparent; color: var(--accent);
   font: inherit; font-size: .85rem; font-weight: 550; cursor: pointer; transition: border-color .15s; }
 .js .more-toggle:hover { border-color: var(--accent); }
 .more-toggle svg { transition: transform .4s ease; }
 .project.open .more-toggle svg { transform: rotate(180deg); }
-.js .project.open .more-toggle { margin-top: 0; }
 @media (prefers-reduced-motion: reduce) { .js .more, .more-toggle svg { transition: none; } }
 .highlights { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; font-size: .9rem; }
 .highlights li { position: relative; padding-left: 18px; }

@@ -87,6 +87,15 @@ newest() { ls -t $1 2>/dev/null | head -1 || true; }
 publish_demo CEREBRO "${DEMO_VIDEO:-$(newest "$HOME/cerebro-demo-*/CEREBRO-demo.mp4")}" cerebro-demo
 publish_demo MealSenseAI "${MEALSENSE_DEMO_VIDEO:-$(newest "$HOME/mealsense-demo-*/MealSenseAI-demo.mp4")}" mealsenseai-demo
 
+# Feedback hub: an admin password on the first run (shown once, kept in .env). Discord alerts are
+# optional: put the channel's webhook URL in .env as FEEDBACK_DISCORD_WEBHOOK=... and run this again.
+if [ -z "$(getkv FEEDBACK_ADMIN_PASSWORD)" ]; then
+  pw="$(head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)"; setkv FEEDBACK_ADMIN_PASSWORD "$pw"
+  echo "==> Feedback admin: user admin, password $pw (also in .env)"
+fi
+[ -n "$(getkv FEEDBACK_DISCORD_WEBHOOK)" ] && echo "==> Feedback alerts: Discord" || echo "-- Feedback alerts: off (set FEEDBACK_DISCORD_WEBHOOK in .env for Discord)"
+
 docker compose --profile build run --rm build
-docker compose up -d --wait web
+docker compose up -d --build --wait feedback web
 curl -fsS "http://$BIND:$PORT/healthz" >/dev/null && echo "==> Portfolio: http://$BIND:$PORT/ (and https://folio.xtangent.ai)"
+curl -fsS "http://$BIND:$PORT/api/feedback/healthz" >/dev/null && echo "==> Feedback: https://folio.xtangent.ai/api/feedback/admin (user admin)"
