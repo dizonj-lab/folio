@@ -31,6 +31,15 @@ for dir in "$MODELS"/*; do
   built="$built $name"
 done
 
+# Static product sites (e.g. NEXUS's landing page), copied as they are.
+for dir in "${SITES_DIR:-/sites}"/*; do
+  [ -f "$dir/index.html" ] || continue
+  name="$(basename "$dir")"
+  echo "==> $name: static site"
+  rm -rf "$STAGE/$name" && cp -R "$dir" "$STAGE/$name"
+  built="$built $name"
+done
+
 if [ -z "$built" ]; then
   echo "!! nothing was built; the site was left as it was"
   exit 1

@@ -5,7 +5,7 @@
 #   /                 portfolio (content: portfolio.json, pages/)
 #   /mealsenseai/     MealSenseAI model (from MEALSENSE_DIR)
 #   /cerebro/         CEREBRO model (from CEREBRO_DIR)
-#   /nexus/           NEXUS model (from NEXUS_DIR)
+#   /nexus/           NEXUS landing page with its demo (from NEXUS_DIR/landing)
 #
 # Public at https://folio.xtangent.ai through the Cloudflare Tunnel, whose cloudflared runs on this
 # machine and reaches http://127.0.0.1:8095. Docker bypasses UFW for published ports, so the port is
@@ -41,7 +41,7 @@ services:
       - ./media:/work/media:ro
       - ${MEALSENSE_MODEL:-./empty}:/models/mealsenseai:ro
       - ${CEREBRO_MODEL:-./empty}:/models/cerebro:ro
-      - ${NEXUS_MODEL:-./empty}:/models/nexus:ro
+      - ${NEXUS_SITE:-./empty}:/sites/nexus:ro
       - site:/site
       - npm-cache:/root/.npm
     command: ["sh", "/work/build.sh"]
