@@ -1,0 +1,39 @@
+/* Feedback icons and dialog. Uses the page's tokens when it has them (--accent, --line, --surface, --muted). */
+.fb[data-app] { display: inline-flex; gap: 2px; align-items: center; }
+.fb-i { position: relative; display: inline-grid; place-items: center; width: 34px; height: 34px; padding: 0; border: 1px solid transparent;
+  border-radius: 999px; background: transparent; color: var(--muted, #5f5f68); cursor: pointer; text-decoration: none; transition: color .15s, background .15s, border-color .15s; }
+.fb-i:hover, .fb-i:focus-visible { color: var(--accent, #0f766e); background: var(--accent-soft, #e6f4f1); }
+.fb-i[aria-pressed="true"] { color: var(--accent, #0f766e); border-color: var(--accent, #0f766e); background: var(--accent-soft, #e6f4f1); }
+.fb-i[aria-pressed="true"] svg { fill: currentColor; fill-opacity: .18; }
+/* Description on hover and on keyboard focus (touch screens get it on tap via focus). */
+.fb-i::after { content: attr(data-tip); position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translate(-50%, 4px); white-space: nowrap;
+  padding: 6px 9px; border-radius: 6px; background: #18181b; color: #fff; font: 500 12px/1.2 system-ui, sans-serif; letter-spacing: 0;
+  opacity: 0; pointer-events: none; transition: opacity .15s, transform .15s; z-index: 20; }
+.fb-i:hover::after, .fb-i:focus-visible::after { opacity: 1; transform: translate(-50%, 0); }
+.fb-i:last-child::after { left: auto; right: 0; transform: translate(0, 4px); }
+.fb-i:last-child:hover::after, .fb-i:last-child:focus-visible::after { transform: translate(0, 0); }
+
+.fb-dlg { width: min(520px, calc(100vw - 32px)); max-height: calc(100vh - 32px); padding: 0; border: 1px solid var(--line, #e7e5e4); border-radius: 14px;
+  background: var(--surface, #fff); color: var(--ink, var(--fg, #18181b)); box-shadow: 0 20px 60px -20px rgb(0 0 0 / .45); }
+.fb-dlg::backdrop { background: rgb(15 15 20 / .45); }
+.fb-dlg form { display: grid; gap: 12px; padding: 22px; font: 14px/1.5 inherit; }
+.fb-dlg .fb-title { margin: 0; font-size: 18px; font-weight: 650; text-transform: none; letter-spacing: 0; color: inherit; }
+.fb-sub { margin: 0; color: var(--muted, #5f5f68); }
+.fb-l { display: grid; gap: 4px; font-size: 13px; font-weight: 550; }
+.fb-l small { font-weight: 400; color: var(--muted, #5f5f68); }
+.fb-dlg input, .fb-dlg textarea { font: inherit; font-size: 14px; color: inherit; background: var(--bg, #fafaf9); border: 1px solid var(--line, #d6d3d1);
+  border-radius: 8px; padding: 8px 10px; min-width: 0; }
+.fb-dlg textarea { resize: vertical; }
+.fb-dlg input:focus, .fb-dlg textarea:focus { outline: 2px solid var(--accent, #0f766e); outline-offset: 0; }
+.fb-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.fb-c { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--muted, #5f5f68); }
+.fb-hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.fb-note { margin: 0; font-size: 12px; color: var(--muted, #5f5f68); }
+.fb-err { margin: 0; min-height: 1em; font-size: 13px; color: #c03030; }
+.fb-btns { display: flex; justify-content: flex-end; gap: 8px; }
+.fb-b { font: inherit; font-size: 14px; font-weight: 550; padding: 8px 16px; border-radius: 999px; border: 1px solid var(--line, #d6d3d1);
+  background: transparent; color: inherit; cursor: pointer; }
+.fb-primary { background: var(--accent, #0f766e); border-color: var(--accent, #0f766e); color: var(--accent-fg, #fff); }
+.fb-primary:disabled { opacity: .6; cursor: wait; }
+@media (max-width: 520px) { .fb-row { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .fb-i, .fb-i::after { transition: none; } }

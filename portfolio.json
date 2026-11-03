@@ -102,12 +102,8 @@
       "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Local SLM (Qwen 2.5 7B)", "LLM second opinion", "Python", "Docker", "nginx"],
       "status": "Under development",
       "context": "Independent R&D",
-      "demo": {
-        "video": "media/nexus-demo.mp4",
-        "captions": "media/nexus-demo.vtt",
-        "summary": "A five-minute narrated tour: the problem, the business imperative, then a design drafted from a plain-language brief inside the firm's guardrails, broken with zone and region outages, corrected, and decided by an architect, ending with Terraform, OpenTofu and LikeC4.",
-        "note": "Pre-release: screens are subject to change. Model responses are simulated where the video says so."
-      }
+      "learnMore": "/nexus/",
+      "demoUrl": "/nexus/#demo"
     }
   ]
 }

@@ -10,7 +10,7 @@ models of **MealSenseAI** and **CEREBRO**. One static site, served by nginx on B
 | `/work/mealsenseai/data-and-ml/` | MealSenseAI sub-project: data engineering, machine learning, model evaluation, with charts from the training evidence |
 | `/mealsenseai/` | MealSenseAI architecture: landscape, capabilities, product rules, containers, components, Buddy, three flows |
 | `/cerebro/` | CEREBRO architecture: its views, from `architecture/likec4` in the CEREBRO repository |
-| `/nexus/` | NEXUS architecture: its views, from `architecture/likec4` in the NEXUS repository (under development) |
+| `/nexus/` | NEXUS landing page (under development), from `landing/` in the NEXUS repository, with its 5-minute demo at `/nexus/#demo` |
 
 It used to live inside the MealSenseAI repository (`infrastructure/architecture-site`); this
 repository carries its history. It is its own Compose project (`folio`) and shares no container,
@@ -64,6 +64,25 @@ cd ~/folio && git pull && ./setup.sh
 
 Also after a model changes: `git pull` in `~/MealSenseAI`, `~/cerebro` or `~/nexus` first. nginx keeps serving
 the previous site until the new build is complete.
+
+## Feedback from visitors
+
+Every project card, and the NEXUS landing page at `/nexus/`, has five icons with a description on
+hover: **I like this**, **Not for me**, **Suggest a feature**, **Give feedback** and **Open the demo**.
+`feedback.js` sends them to the feedback hub (`feedback/app.py`, the `feedback` service), which keeps
+them in one SQLite database on the `feedback-data` volume.
+
+- **See everything:** `https://folio.xtangent.ai/api/feedback/admin`, user `admin`, password
+  `FEEDBACK_ADMIN_PASSWORD` in `.env` (printed by the first `./setup.sh`). Filter by app, type and
+  date; download CSV; delete a message when someone asks.
+- **Discord alerts (optional):** in your Discord server, Edit Channel → Integrations → Webhooks →
+  New Webhook → Copy Webhook URL. Put it in `.env` as `FEEDBACK_DISCORD_WEBHOOK=https://discord.com/api/webhooks/...`
+  and run `./setup.sh` again. The URL stays on the server; it never reaches a browser.
+- **What is stored:** what the responder typed (name, role and email only if they give them; email
+  only with their consent, to reply), the app, the page, a random visitor ID (one vote per visitor
+  per app), the country Cloudflare reports, and the time. IP addresses are used in memory for rate
+  limits only. Messages older than 365 days are removed (`FEEDBACK_RETENTION_DAYS`).
+- Adding a project: its slug must be in `FEEDBACK_APPS` (default `mealsenseai,cerebro,nexus`).
 
 ## Who can reach it
 

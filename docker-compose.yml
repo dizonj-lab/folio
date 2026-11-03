@@ -5,7 +5,8 @@
 #   /                 portfolio (content: portfolio.json, pages/)
 #   /mealsenseai/     MealSenseAI model (from MEALSENSE_DIR)
 #   /cerebro/         CEREBRO model (from CEREBRO_DIR)
-#   /nexus/           NEXUS model (from NEXUS_DIR)
+#   /nexus/           NEXUS landing page with its demo (from NEXUS_DIR/landing)
+#   /api/feedback/    feedback hub (the feedback service); its admin page is /api/feedback/admin
 #
 # Public at https://folio.xtangent.ai through the Cloudflare Tunnel, whose cloudflared runs on this
 # machine and reaches http://127.0.0.1:8095. Docker bypasses UFW for published ports, so the port is
@@ -34,6 +35,8 @@ services:
       - ./page.template.html:/work/page.template.html:ro
       - ./site.css:/work/site.css:ro
       - ./charts.js:/work/charts.js:ro
+      - ./feedback.js:/work/feedback.js:ro
+      - ./feedback.css:/work/feedback.css:ro
       - ./pages:/work/pages:ro
       - ./render.mjs:/work/render.mjs:ro
       - ./portfolio.json:/work/portfolio.json:ro
@@ -41,7 +44,7 @@ services:
       - ./media:/work/media:ro
       - ${MEALSENSE_MODEL:-./empty}:/models/mealsenseai:ro
       - ${CEREBRO_MODEL:-./empty}:/models/cerebro:ro
-      - ${NEXUS_MODEL:-./empty}:/models/nexus:ro
+      - ${NEXUS_SITE:-./empty}:/sites/nexus:ro
       - site:/site
       - npm-cache:/root/.npm
     command: ["sh", "/work/build.sh"]
@@ -65,6 +68,31 @@ services:
     restart: unless-stopped
     mem_limit: 128m
 
+  # Feedback hub: votes, suggestions and feedback from every project (feedback/app.py). Not published
+  # on any host port; nginx proxies /api/feedback/ to it. Settings come from .env (setup.sh).
+  feedback:
+    <<: *hardening
+    build: ./feedback
+    image: folio-feedback:latest
+    read_only: true
+    cap_drop: [ALL]
+    tmpfs: [/tmp]
+    environment:
+      FEEDBACK_ADMIN_PASSWORD: ${FEEDBACK_ADMIN_PASSWORD:-}
+      FEEDBACK_DISCORD_WEBHOOK: ${FEEDBACK_DISCORD_WEBHOOK:-}
+      FEEDBACK_APPS: ${FEEDBACK_APPS:-mealsenseai,cerebro,nexus}
+      FEEDBACK_RETENTION_DAYS: ${FEEDBACK_RETENTION_DAYS:-365}
+    volumes:
+      - feedback-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8000/api/feedback/healthz',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+    mem_limit: 128m
+
 volumes:
+  feedback-data: {}
   site: {}
   npm-cache: {}

@@ -31,6 +31,15 @@ for dir in "$MODELS"/*; do
   built="$built $name"
 done
 
+# Static product sites (e.g. NEXUS's landing page), copied as they are.
+for dir in "${SITES_DIR:-/sites}"/*; do
+  [ -f "$dir/index.html" ] || continue
+  name="$(basename "$dir")"
+  echo "==> $name: static site"
+  rm -rf "$STAGE/$name" && cp -R "$dir" "$STAGE/$name"
+  built="$built $name"
+done
+
 if [ -z "$built" ]; then
   echo "!! nothing was built; the site was left as it was"
   exit 1
@@ -38,7 +47,7 @@ fi
 
 # The index is the portfolio: content from portfolio.json (and pages/), rendered into the templates.
 node "$WORK/render.mjs" "$WORK" "$STAGE" "$built" "$VERSION"
-cp -R "$WORK/brand" "$STAGE/brand" && cp "$WORK/site.css" "$WORK/charts.js" "$STAGE/"
+cp -R "$WORK/brand" "$STAGE/brand" && cp "$WORK/site.css" "$WORK/charts.js" "$WORK/feedback.css" "$WORK/feedback.js" "$STAGE/"
 # Demo videos and their subtitles, when setup.sh supplied them.
 if ls "$WORK/media"/* >/dev/null 2>&1; then cp -R "$WORK/media" "$STAGE/media"; fi
 echo "ok" > "$STAGE/healthz"

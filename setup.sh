@@ -56,14 +56,15 @@ model() {  # $1 name, $2 path: the model's directory, or ./empty when it is not 
 MEALSENSE_MODEL="$(model MealSenseAI "$MEALSENSE_DIR/architecture/likec4")"
 CEREBRO_MODEL="$(model CEREBRO "$CEREBRO_DIR/architecture/likec4")"
 [ "$CEREBRO_MODEL" = "$(pwd)/empty" ] && echo "   CEREBRO's model is on the cerebro-mvp branch and the branches after it."
-NEXUS_MODEL="$(model NEXUS "$NEXUS_DIR/architecture/likec4")"
+# NEXUS is published as its landing page (static), not as a LikeC4 model.
+if [ -f "$NEXUS_DIR/landing/index.html" ]; then NEXUS_SITE="$NEXUS_DIR/landing"; else NEXUS_SITE="$(pwd)/empty"; echo "-- NEXUS landing page not found in $NEXUS_DIR/landing; /nexus/ is left out."; fi
 
 setkv ARCH_BIND "$BIND"; setkv ARCH_PORT "$PORT"
 setkv MEALSENSE_DIR "$MEALSENSE_DIR"; setkv CEREBRO_DIR "$CEREBRO_DIR"; setkv NEXUS_DIR "$NEXUS_DIR"
-setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"; setkv NEXUS_MODEL "$NEXUS_MODEL"
+setkv MEALSENSE_MODEL "$MEALSENSE_MODEL"; setkv CEREBRO_MODEL "$CEREBRO_MODEL"; setkv NEXUS_SITE "$NEXUS_SITE"
 
-# The demo videos: the newest one each product's demo/run.sh made (NEXUS: landing/media in NEXUS_DIR),
-# or DEMO_VIDEO=… / MEALSENSE_DEMO_VIDEO=… / NEXUS_DEMO_VIDEO=….
+# The demo videos: the newest one each product's demo/run.sh made, or DEMO_VIDEO=… / MEALSENSE_DEMO_VIDEO=….
+# (NEXUS's demo is part of its landing page at /nexus/#demo.)
 # Copied into media/ (not committed: they are large) with subtitles converted to WebVTT for browsers,
 # and photo credits alongside when the video came with them.
 mkdir -p media
@@ -85,8 +86,16 @@ publish_demo() {  # $1 name, $2 the video to use (may be empty), $3 slug in medi
 newest() { ls -t $1 2>/dev/null | head -1 || true; }
 publish_demo CEREBRO "${DEMO_VIDEO:-$(newest "$HOME/cerebro-demo-*/CEREBRO-demo.mp4")}" cerebro-demo
 publish_demo MealSenseAI "${MEALSENSE_DEMO_VIDEO:-$(newest "$HOME/mealsense-demo-*/MealSenseAI-demo.mp4")}" mealsenseai-demo
-publish_demo NEXUS "${NEXUS_DEMO_VIDEO:-$NEXUS_DIR/landing/media/nexus-demo.mp4}" nexus-demo
+
+# Feedback hub: an admin password on the first run (shown once, kept in .env). Discord alerts are
+# optional: put the channel's webhook URL in .env as FEEDBACK_DISCORD_WEBHOOK=... and run this again.
+if [ -z "$(getkv FEEDBACK_ADMIN_PASSWORD)" ]; then
+  pw="$(head -c 48 /dev/urandom | base64 | tr -dc 'A-Za-z0-9' | head -c 24)"; setkv FEEDBACK_ADMIN_PASSWORD "$pw"
+  echo "==> Feedback admin: user admin, password $pw (also in .env)"
+fi
+[ -n "$(getkv FEEDBACK_DISCORD_WEBHOOK)" ] && echo "==> Feedback alerts: Discord" || echo "-- Feedback alerts: off (set FEEDBACK_DISCORD_WEBHOOK in .env for Discord)"
 
 docker compose --profile build run --rm build
-docker compose up -d --wait web
+docker compose up -d --build --wait feedback web
 curl -fsS "http://$BIND:$PORT/healthz" >/dev/null && echo "==> Portfolio: http://$BIND:$PORT/ (and https://folio.xtangent.ai)"
+curl -fsS "http://$BIND:$PORT/api/feedback/healthz" >/dev/null && echo "==> Feedback: https://folio.xtangent.ai/api/feedback/admin (user admin)"

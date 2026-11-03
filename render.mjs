@@ -46,7 +46,7 @@ const common = {
 }
 
 // A project's demo video is published only when its file was supplied to this build (setup.sh copies
-// the newest one into media/); without it the card simply has no "Watch demo" link.
+// the newest one into media/); without it the card has no demo icon.
 const hasDemo = p => p.demo && existsSync(join(work, p.demo.video))
 const demoHref = p => `/demo/${p.slug}/`
 // Photo credits that came with the video (a Markdown list: "- **dish**: [file](url), by …, licence").
@@ -60,9 +60,11 @@ const creditsHtml = p => {
   return items.length ? `<details class="note"><summary>Photo credits</summary><ul>${items.map(i => `<li>${i}</li>`).join('')}</ul></details>` : ''
 }
 
+// The demo the feedback row's play icon opens: the published demo page, else the project's demoUrl.
+const demoLink = p => hasDemo(p) ? demoHref(p) : (p.demoUrl || '')
+
 const card = p => {
   const links = [...(p.links ?? [])]
-  if (hasDemo(p)) links.splice(Math.min(1, links.length), 0, { label: 'Watch demo', href: demoHref(p) })
   const subs = p.subprojects ?? []
   return `
       <article class="project" id="${esc(p.slug)}">
@@ -80,7 +82,10 @@ const card = p => {
           ${p.stack?.length ? `<ul class="stack">${p.stack.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
           ${subs.length ? `<div class="subprojects"><h4>Sub-projects</h4>${subs.map(s => `<a class="subproject" href="${subHref(p, s)}"><div><strong>${esc(s.title)}</strong><span>${esc(s.summary)}</span></div><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div>` : ''}
         </div></div>
-        <button class="more-toggle" type="button" aria-expanded="false" aria-controls="more-${esc(p.slug)}"><span>Show me more</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+        <div class="card-actions">
+          <button class="more-toggle" type="button" aria-expanded="false" aria-controls="more-${esc(p.slug)}"><span>Show me more</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+          <div class="fb" data-app="${esc(p.slug)}" data-name="${esc(p.name)}"${p.learnMore ? ` data-info="${esc(p.learnMore)}"` : ''}${demoLink(p) ? ` data-demo="${esc(demoLink(p))}"` : ''}></div>
+        </div>
         <footer>
           ${p.context ? `<span class="context">${esc(p.context)}</span>` : '<span></span>'}
           <nav>${links.map(l => link(l)).join('')}</nav>
