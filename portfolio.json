@@ -9,7 +9,7 @@
     "statement": "Making AI practical, personal, and meaningful in everyday life.",
     "about": [
       "Experienced technology architect passionate about AI and innovation. I design and build AI systems end to end — from the model and the data to the API, the interface and the server it runs on.",
-      "MealSenseAI and CEREBRO were both developed as MVPs during my postgraduate studies in AI Systems at NUS — MealSenseAI applying machine learning, computer vision and conversational AI, CEREBRO knowledge representation and reasoning. Both projects here are self-hosted on my own home server and run their models locally."
+      "MealSenseAI and CEREBRO were both developed as MVPs during my postgraduate studies in AI Systems at NUS — MealSenseAI applying machine learning, computer vision and conversational AI, CEREBRO knowledge representation and reasoning. Both run their AI on local models."
     ],
     "links": [
       { "label": "LinkedIn", "href": "https://www.linkedin.com/in/joselito-dizon" }
@@ -93,15 +93,21 @@
       "name": "NEXUS",
       "logo": "brand/nexus.svg",
       "tagline": "Grounded architecture workbench.",
-      "description": "A self-hosted architecture workbench where architects design cloud, hybrid and on-premises systems grounded in their organisation's own policies, controls and architecture standards. It simulates infrastructure on the fly across AWS, Azure, Google Cloud and on-premises data centres: load and scaling behaviour, what-if analyses (traffic spikes, zone and region outages, failover), resilience-pattern comparisons and cost estimates. AI agents review each design against the ground truth, and an architect approves every change.",
+      "description": "An architecture workbench where architects design cloud, hybrid and on-premises systems grounded in their organisation's own policies, controls and architecture standards. It simulates infrastructure on the fly across AWS, Azure, Google Cloud and on-premises data centres: load and scaling behaviour, what-if analyses (traffic spikes, zone and region outages, failover), resilience-pattern comparisons and cost estimates. AI agents review each design against the ground truth, and an architect approves every change. The AI runs on a local small language model (SLM), with a larger LLM for second opinions.",
       "highlights": [
         "Grounded in ground truth: policies, controls and architecture standards checked by rule",
         "On-the-fly simulation across AWS, Azure, Google Cloud and on-premises: load, scaling, outages, failover and cost",
         "AI agents review and propose; the architect approves every change"
       ],
-      "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Ollama (Qwen 2.5 7B)", "Python", "Docker", "nginx"],
+      "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Local SLM (Qwen 2.5 7B)", "LLM second opinion", "Python", "Docker", "nginx"],
       "status": "Under development",
-      "context": "Independent R&D · self-hosted"
+      "context": "Independent R&D",
+      "demo": {
+        "video": "media/nexus-demo.mp4",
+        "captions": "media/nexus-demo.vtt",
+        "summary": "A five-minute narrated tour: the problem, the business imperative, then a design drafted from a plain-language brief inside the firm's guardrails, broken with zone and region outages, corrected, and decided by an architect, ending with Terraform, OpenTofu and LikeC4.",
+        "note": "Pre-release: screens are subject to change. Model responses are simulated where the video says so."
+      }
     }
   ]
 }
