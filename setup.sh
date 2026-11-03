@@ -96,6 +96,13 @@ fi
 [ -n "$(getkv FEEDBACK_DISCORD_WEBHOOK)" ] && echo "==> Feedback alerts: Discord" || echo "-- Feedback alerts: off (set FEEDBACK_DISCORD_WEBHOOK in .env for Discord)"
 
 docker compose --profile build run --rm build
-docker compose up -d --build --wait feedback web
+docker compose up -d --build --wait feedback
+# nginx.conf is mounted as a file: git pull replaces it, and Compose does not notice. Recreating web
+# (about a second) makes nginx read the current one.
+docker compose up -d --force-recreate --wait web
 curl -fsS "http://$BIND:$PORT/healthz" >/dev/null && echo "==> Portfolio: http://$BIND:$PORT/ (and https://folio.xtangent.ai)"
-curl -fsS "http://$BIND:$PORT/api/feedback/healthz" >/dev/null && echo "==> Feedback: https://folio.xtangent.ai/api/feedback/admin (user admin)"
+if curl -fsS "http://$BIND:$PORT/api/feedback/healthz" >/dev/null; then
+  echo "==> Feedback: https://folio.xtangent.ai/api/feedback/admin (user admin)"
+else
+  echo "!! Feedback hub not reachable through the site: docker compose logs feedback web"
+fi
