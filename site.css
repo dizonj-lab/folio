@@ -318,19 +318,3 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
 /* Selected work: the heading sits above the full-width carousel; the details follow without a rule. */
 #work { padding-bottom: 0; }
 .details-wrap { border-top: 0; }
-
-/* Backdrop: a line-art skyline of AI, design and planning, and infrastructure (brand/backdrop.svg) behind the top of
-   the home page, painted in the theme's accent through the drawing as a mask, over a faint blueprint grid. */
-.backdrop { position: absolute; top: 0; left: 0; right: 0; height: 392px; z-index: 0; pointer-events: none; overflow: hidden; }
-.backdrop::before { content: ""; position: absolute; inset: 0; background: var(--accent); opacity: .10;
-  -webkit-mask: url("/brand/backdrop.svg") center bottom / max(1100px, 100%) auto no-repeat;
-          mask: url("/brand/backdrop.svg") center bottom / max(1100px, 100%) auto no-repeat; }
-.backdrop::after { content: ""; position: absolute; inset: 0; opacity: .5;
-  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
-  background-size: 32px 32px;
-  -webkit-mask: radial-gradient(ellipse 70% 80% at 70% 30%, #000 10%, transparent 70%);
-          mask: radial-gradient(ellipse 70% 80% at 70% 30%, #000 10%, transparent 70%); }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .backdrop::before { opacity: .16; } }
-:root[data-theme="dark"] .backdrop::before { opacity: .16; }
-main, .carousel, .site-foot { position: relative; z-index: 1; }
-@media (max-width: 720px) { .backdrop { height: 400px; } }
