@@ -31,14 +31,6 @@
       "stack": ["Computer vision", "FastAPI", "React", "PostgreSQL", "Ollama"],
       "status": "MVP",
       "context": "Independent R&D",
-      "subprojects": [
-        {
-          "slug": "data-and-ml",
-          "title": "Data Engineering, Machine Learning and Model Evaluation",
-          "summary": "310,861 images, a 320-class taxonomy and a leakage audit behind an EfficientNet-B0 classifier: 70.6% top-1 and 85.7% top-3 on 45,800 held-out images, with training and evaluation charts.",
-          "content": "pages/mealsenseai-ml.json"
-        }
-      ],
       "links": [
         { "label": "Open app", "href": "https://mealsense.xtangent.ai" }
       ],
@@ -48,6 +40,26 @@
         "credits": "media/mealsenseai-demo-photo-credits.md",
         "summary": "A five-minute narrated tour: why unlabelled meals are the gap in diabetes self-care, then one hawker lunch from photo to portions, glucose impact, a portion and walking what-if, and the Meal Advisor.",
         "note": "Wei Ming and his meals are fictional. What you see is the real application and its real output. Educational estimates only, not medical advice."
+      }
+    },
+    {
+      "slug": "food-recognition",
+      "name": "Food Recognition Model",
+      "logo": "brand/mealsenseai.svg",
+      "parent": "mealsenseai",
+      "tagline": "A 320-class food classifier, from 310,861 audited images.",
+      "description": "Two public datasets (Food-101 and FoodSG) merged into one 320-class taxonomy, audited for leakage and conflicting labels, and used to fine-tune EfficientNet-B0 on a self-hosted GPU. It reaches 70.6% top-1 and 85.7% top-3 accuracy on 45,800 held-out test images, and powers MealSenseAI's meal recognition.",
+      "highlights": [
+        "310,861 images audited; 320 harmonised classes",
+        "70.6% top-1 and 85.7% top-3 accuracy on 45,800 held-out images",
+        "Trained and evaluated on my own GPU (RTX 5060 Ti, 16 GB)"
+      ],
+      "stack": ["PyTorch", "EfficientNet-B0", "CUDA", "Python", "FastAPI"],
+      "status": "Case study",
+      "context": "Part of MealSenseAI",
+      "page": {
+        "slug": "data-and-ml",
+        "content": "pages/mealsenseai-ml.json"
       }
     },
     {
@@ -65,20 +77,6 @@
       "stack": ["Knowledge graphs", "Next.js", "FastAPI", "PostgreSQL", "Kubernetes"],
       "status": "MVP",
       "context": "Independent R&D",
-      "subprojects": [
-        {
-          "slug": "data-and-ml",
-          "title": "Data Engineering, Machine Learning and Model Evaluation · Text documents",
-          "summary": "Search, topics and answering, tested on public benchmarks on my own GPU. Designed models search 3× better than the live setup (nDCG@10 0.73 vs 0.23).",
-          "content": "pages/cerebro-ml.json"
-        },
-        {
-          "slug": "images",
-          "title": "Data Engineering, Machine Learning and Model Evaluation · Images",
-          "summary": "Naming, describing and linking images, tested on 100 ImageNetV2 photos on my own GPU. ResNet-50 is right 71% of the time; the top similar image is relevant 65% of the time — good suggestions, still reviewed by a person.",
-          "content": "pages/cerebro-images.json"
-        }
-      ],
       "demo": {
         "video": "media/cerebro-demo.mp4",
         "captions": "media/cerebro-demo.vtt",
@@ -88,6 +86,40 @@
       "links": [
         { "label": "Open app", "href": "https://cerebro.xtangent.ai" }
       ]
+    },
+    {
+      "slug": "knowledge-search",
+      "name": "Knowledge Search Evaluation",
+      "logo": "brand/cerebro.png",
+      "logoTile": true,
+      "parent": "cerebro",
+      "tagline": "Search, topics and cited answers, tested on public benchmarks.",
+      "description": "How well CEREBRO searches, groups topics and answers questions, measured on SciFact, 20 Newsgroups and SQuAD 2.0 on my own GPU. With the models it was designed for, search scores 0.73 nDCG@10, three times the live setup, and 93% of answers cite the right source.",
+      "highlights": ["Search 0.73 nDCG@10: 3.1× the live setup", "Topic grouping macro-F1 0.73", "93% of answers cite the right source"],
+      "stack": ["PyTorch", "scikit-learn", "Ollama", "PostgreSQL"],
+      "status": "Case study",
+      "context": "Part of CEREBRO",
+      "page": {
+        "slug": "data-and-ml",
+        "content": "pages/cerebro-ml.json"
+      }
+    },
+    {
+      "slug": "image-understanding",
+      "name": "Image Understanding Evaluation",
+      "logo": "brand/cerebro.png",
+      "logoTile": true,
+      "parent": "cerebro",
+      "tagline": "Naming, captioning and linking images, tested on ImageNetV2.",
+      "description": "Can CEREBRO describe images and find related ones on its own? On 100 ImageNetV2 photos, ResNet-50 names the subject 71% of the time (89% within its top five), every image gets a Florence-2 caption, and the top similar image is relevant 65% of the time: useful suggestions that a person still reviews.",
+      "highlights": ["ResNet-50: 71% top-1, 89% top-5", "100 of 100 images captioned by Florence-2", "Top similar image relevant 65% of the time"],
+      "stack": ["PyTorch", "torchvision", "Florence-2", "scikit-learn"],
+      "status": "Case study",
+      "context": "Part of CEREBRO",
+      "page": {
+        "slug": "images",
+        "content": "pages/cerebro-images.json"
+      }
     },
     {
       "slug": "nexus",
@@ -100,7 +132,18 @@
         "On-the-fly simulation across AWS, Azure, Google Cloud and on-premises: load, scaling, outages, failover and cost",
         "AI agents review and propose; the architect approves every change"
       ],
-      "stack": ["Next.js", "React", "TypeScript", "FastAPI", "PostgreSQL", "Local SLM (Qwen 2.5 7B)", "LLM second opinion", "Python", "Docker", "nginx"],
+      "stack": [
+        "Next.js",
+        "React",
+        "TypeScript",
+        "FastAPI",
+        "PostgreSQL",
+        "Local SLM (Qwen 2.5 7B)",
+        "LLM second opinion",
+        "Python",
+        "Docker",
+        "nginx"
+      ],
       "status": "Under development",
       "context": "Independent R&D",
       "learnMore": "/nexus/",

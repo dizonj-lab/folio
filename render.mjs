@@ -18,6 +18,9 @@ const link = ({ label, href }, cls = '') =>
   `<a${cls ? ` class="${cls}"` : ''} href="${esc(href)}"${external(href) ? ' target="_blank" rel="noopener"' : ''}>${esc(label)}</a>`
 const initials = name => esc(name.split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase())
 const subHref = (p, s) => `/work/${p.slug}/${s.slug}/`
+// A project with its own write-up (`page`) that belongs to another (`parent`) keeps the parent's URL: /work/<parent>/<page>/.
+const ownerOf = p => (p.parent && projects.find(x => x.slug === p.parent)) || p
+const pageHref = p => p.page ? subHref(ownerOf(p), p.page) : ''
 // Asset URLs carry a build stamp, so browsers and Cloudflare fetch the new CSS and JS after every
 // rebuild instead of serving a cached copy.
 const BUILD = Date.now().toString(36)
@@ -69,7 +72,8 @@ const demoLink = p => hasDemo(p) ? demoHref(p) : (p.demoUrl || '')
 // The card's summary: the description's first sentence.
 const summary = s => { const m = String(s ?? '').match(/^.+?[.!?](?=\s|$)/); return m ? m[0] : String(s ?? '') }
 const card = (p, i, all) => {
-  const acts = [...(p.links ?? []).map(l => link(l, 'btn primary')),
+  const acts = [...(p.page ? [link({ label: 'Read case study', href: pageHref(p) }, 'btn primary')] : []),
+    ...(p.links ?? []).map(l => link(l, 'btn primary')),
     ...(demoLink(p) ? [link({ label: 'Watch demo', href: demoLink(p) }, 'btn')] : []),
     ...(p.learnMore ? [link({ label: 'Learn more', href: p.learnMore }, 'btn')] : [])]
   return `
@@ -91,6 +95,9 @@ const card = (p, i, all) => {
 }
 const detail = (p, i) => {
   const subs = p.subprojects ?? []
+  // A product lists the case studies that belong to it; each opens its own card in the carousel.
+  const related = projects.filter(x => x.parent === p.slug)
+  const fbApp = p.parent || p.slug, info = p.learnMore || pageHref(p)
   return `
         <div class="detail" data-i="${i}" id="detail-${esc(p.slug)}">
           <h3>${esc(p.name)}</h3>
@@ -98,9 +105,10 @@ const detail = (p, i) => {
           ${p.highlights?.length ? `<ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
           ${p.stack?.length ? `<ul class="stack">${p.stack.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
           ${subs.length ? `<div class="subprojects"><h4>Sub-projects</h4>${subs.map(s => `<a class="subproject" href="${subHref(p, s)}"><div><strong>${esc(s.title)}</strong><span>${esc(s.summary)}</span></div><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div>` : ''}
+          ${related.length ? `<div class="subprojects"><h4>Case studies</h4>${related.map(x => `<a class="subproject" href="#${esc(x.slug)}"><div><strong>${esc(x.name)}</strong><span>${esc(x.tagline)}</span></div><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div>` : ''}
           <div class="detail-foot">
             ${p.context ? `<span class="context">${esc(p.context)}</span>` : '<span></span>'}
-            <div class="fb" data-app="${esc(p.slug)}" data-name="${esc(p.name)}"${p.learnMore ? ` data-info="${esc(p.learnMore)}"` : ''}${demoLink(p) ? ` data-demo="${esc(demoLink(p))}"` : ''}></div>
+            <div class="fb" data-app="${esc(fbApp)}" data-name="${esc(p.name)}"${info ? ` data-info="${esc(info)}"` : ''}${demoLink(p) ? ` data-demo="${esc(demoLink(p))}"` : ''}></div>
           </div>
         </div>`
 }
@@ -220,8 +228,10 @@ for (const p of projects.filter(hasDemo)) {
   }))
 }
 
-for (const p of projects) {
-  for (const s of p.subprojects ?? []) {
+// Write-up pages: a project's own (p.page, under its parent's URL) and any remaining sub-projects.
+const writeUps = projects.flatMap(p => [...(p.page ? [[ownerOf(p), { ...p.page, title: p.name, summary: p.tagline }]] : []), ...(p.subprojects ?? []).map(s => [p, s])])
+for (const [p, s] of writeUps) {
+  {
     const page = JSON.parse(readFileSync(join(work, s.content), 'utf8'))
     const data = page.charts ? JSON.parse(readFileSync(join(work, page.charts), 'utf8')) : {}
     const dir = join(stage, 'work', p.slug, s.slug)
