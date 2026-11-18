@@ -33,19 +33,33 @@ const mark = p => p.logo
 
 // The stored choice is applied before first paint so a dark-mode visitor never sees a white flash.
 // Storage can be unavailable (private windows, blocked site data); the page then follows the system.
+// Colour themes (site.css :root[data-palette]); '' is the default teal. A visitor's choice lasts for the page only.
+const PALETTES = [["", "Teal", "#0f766e"], ["indigo", "Slate & indigo", "#4338ca"], ["blue", "Graphite & blue", "#2563eb"], ["forest", "Stone & forest", "#2f6b4f"], ["mono", "Ink & white", "#111111"], ["burgundy", "Grey & burgundy", "#9f1239"], ["amber", "Sand & amber", "#a15c07"], ["plum", "Mist & plum", "#86198f"]]
 const THEME_SCRIPT = `<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}
 document.documentElement.classList.add('js');
+function setPalette(k){var r=document.documentElement;if(k)r.dataset.palette=k;else delete r.dataset.palette;document.querySelectorAll('[data-pal]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.pal===k?'true':'false')})}
+document.addEventListener('DOMContentLoaded',function(){var k=document.documentElement.dataset.palette||'';document.querySelectorAll('[data-pal]').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.pal===k?'true':'false')})});
+document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-pal]');if(b){setPalette(b.dataset.pal);return}document.querySelectorAll('.theme-menu[open]').forEach(function(m){if(!m.contains(e.target))m.open=false})});
+document.addEventListener('keydown',function(e){if(e.key==='Escape')document.querySelectorAll('.theme-menu[open]').forEach(function(m){m.open=false;m.querySelector('summary').focus()})});
 function toggleTheme(){var r=document.documentElement,d=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=d==='dark'?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('theme',n)}catch(e){}}</script>`
-const THEME_BUTTON = `<button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark theme" title="Light / dark theme">
-          <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-          <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-        </button>`
+const THEME_BUTTON = `<details class="theme-menu">
+          <summary aria-label="Colour theme"><i aria-hidden="true"></i>Theme</summary>
+          <div class="menu-pop" role="group" aria-label="Colour theme">
+            <span class="mlabel">Colours</span>
+            ${PALETTES.map(([k, n, c]) => `<button type="button" data-pal="${k}" aria-pressed="false"><i style="background:${c}" aria-hidden="true"></i>${n}</button>`).join('')}
+            <hr>
+            <button type="button" onclick="toggleTheme()"><svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg><svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>Light / dark</button>
+          </div>
+        </details>`
 
 const common = {
   NAME: esc(profile.name),
   SHORT_NAME: esc(profile.shortName ?? profile.name),
   THEME_SCRIPT,
   THEME_BUTTON,
+  // Top bar: the full name with the roles under it, and the profile links (LinkedIn) in the menu.
+  WHO: `<a class="who" href="/"><span class="wordmark">${esc(profile.name)}</span><span class="roles">${(profile.roles ?? [profile.role]).map(x => `<span>${esc(x)}</span>`).join('')}</span></a>`,
+  NAV_LINKS: (profile.links ?? []).map(l => `<a href="${esc(l.href)}"${external(l.href) ? ' target="_blank" rel="noopener"' : ''}>${esc(l.label)}${external(l.href) ? ' <span aria-hidden="true">↗</span>' : ''}</a>`).join(''),
   YEAR: String(new Date().getUTCFullYear()),
   STAMP: new Date().toISOString().slice(0, 16).replace('T', ' ') + ' UTC',
   VERSION: esc(version),

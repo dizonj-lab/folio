@@ -16,9 +16,9 @@
 <body>
   <div class="top">
     <div class="wrap">
-      <a class="wordmark" href="#">{{SHORT_NAME}}</a>
+      {{WHO}}
       <div class="top-actions">
-        <nav><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a></nav>
+        <nav><a href="#work">Work</a><a href="#about">About</a><a href="#contact">Contact</a>{{NAV_LINKS}}</nav>
         {{THEME_BUTTON}}
       </div>
     </div>
@@ -26,9 +26,7 @@
 
   <main class="wrap">
     <div class="hero">
-      <p class="eyebrow roles">{{ROLES}}</p>
       <h1>{{STATEMENT}}</h1>
-      <div class="pills">{{PROFILE_LINKS}}</div>
     </div>
 
     <section id="work">
