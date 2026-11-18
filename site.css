@@ -113,6 +113,10 @@ h2 { margin: 0; font-size: .8rem; font-weight: 600; letter-spacing: .12em; text-
 /* The centred project's details, under the carousel. */
 .details-wrap { padding-top: 28px; }
 .detail { display: grid; gap: 14px; max-width: 68ch; margin: 0 auto; padding-bottom: 28px; }
+.detail[hidden] { display: none; }
+.js .detail:not([hidden]) { animation: detail-in .3s ease; }
+@keyframes detail-in { from { opacity: 0; transform: translateY(4px); } }
+@media (prefers-reduced-motion: reduce) { .js .detail:not([hidden]) { animation: none; } }
 .detail + .detail { border-top: 1px solid var(--line); padding-top: 28px; }
 .js .detail + .detail { border-top: 0; padding-top: 0; }
 .detail h3 { margin: 0; font-size: 1.05rem; }
