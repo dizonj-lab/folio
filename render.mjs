@@ -1,6 +1,7 @@
 // Render the portfolio from portfolio.json: the index, plus one page per sub-project.
 //   node render.mjs <work dir> <stage dir> "<built slugs>" <likec4 version>
-// Cards are a standard height: a short summary, with the rest behind "Show me more". `logoTile: true` sets a logo on a light tile, for
+// Projects are a carousel of same-height cards (summary, stack, buttons); the centred card's full description,
+// highlights, sub-projects and feedback icons show in a details panel below. `logoTile: true` sets a logo on a light tile, for
 // marks drawn in dark ink that would vanish on the dark theme. A sub-project's page content lives in
 // its own JSON file (see pages/) and is written to /work/<project>/<sub-project>/. Everything is
 // escaped: the JSON is content, not HTML.
@@ -21,7 +22,7 @@ const subHref = (p, s) => `/work/${p.slug}/${s.slug}/`
 // rebuild instead of serving a cached copy.
 const BUILD = Date.now().toString(36)
 const fill = (template, values) => readFileSync(join(work, template), 'utf8').replace(/\{\{(\w+)\}\}/g, (m, k) => values[k] ?? m)
-  .replace(/(href|src)="(\/(?:site\.css|feedback\.css|feedback\.js|charts\.js))"/g, `$1="$2?v=${BUILD}"`)
+  .replace(/(href|src)="(\/(?:site\.css|feedback\.css|feedback\.js|charts\.js|carousel\.js))"/g, `$1="$2?v=${BUILD}"`)
 
 const mark = p => p.logo
   ? `<img class="mark${p.logoTile ? ' mark-tile' : ''}" src="/${esc(p.logo)}" alt="" width="56" height="56">`
@@ -31,8 +32,6 @@ const mark = p => p.logo
 // Storage can be unavailable (private windows, blocked site data); the page then follows the system.
 const THEME_SCRIPT = `<script>try{var t=localStorage.getItem('theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch(e){}
 document.documentElement.classList.add('js');
-document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('.project .more').forEach(function(m){m.inert=true})});
-document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('.more-toggle');if(!b)return;var c=b.closest('.project'),o=!c.classList.contains('open'),m=c.querySelector('.more');c.classList.toggle('open',o);b.setAttribute('aria-expanded',o);b.firstChild.textContent=o?'Show less':'Show me more';if(m)m.inert=!o});
 function toggleTheme(){var r=document.documentElement,d=r.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'),n=d==='dark'?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('theme',n)}catch(e){}}</script>`
 const THEME_BUTTON = `<button class="theme-toggle" type="button" onclick="toggleTheme()" aria-label="Switch between light and dark theme" title="Light / dark theme">
           <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
@@ -67,34 +66,43 @@ const creditsHtml = p => {
 // The demo the feedback row's play icon opens: the published demo page, else the project's demoUrl.
 const demoLink = p => hasDemo(p) ? demoHref(p) : (p.demoUrl || '')
 
-const card = p => {
-  const links = [...(p.links ?? [])]
+// The card's summary: the description's first sentence.
+const summary = s => { const m = String(s ?? '').match(/^.+?[.!?](?=\s|$)/); return m ? m[0] : String(s ?? '') }
+const card = (p, i, all) => {
+  const acts = [...(p.links ?? []).map(l => link(l, 'btn primary')),
+    ...(demoLink(p) ? [link({ label: 'Watch demo', href: demoLink(p) }, 'btn')] : []),
+    ...(p.learnMore ? [link({ label: 'Learn more', href: p.learnMore }, 'btn')] : [])]
+  return `
+      <article class="slide" id="${esc(p.slug)}" role="group" aria-roledescription="slide" aria-label="${i + 1} of ${all.length}: ${esc(p.name)}" data-i="${i}">
+        <div class="project">
+          <header>
+            ${mark(p)}
+            <div>
+              <h3>${esc(p.name)}</h3>
+              <p class="tagline">${esc(p.tagline)}</p>
+            </div>
+            ${p.status ? `<span class="status">${esc(p.status)}</span>` : ''}
+          </header>
+          <p class="desc">${esc(summary(p.description))}</p>
+          ${p.stack?.length ? `<ul class="stack">${p.stack.slice(0, 4).map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
+          <nav class="acts">${acts.join('')}</nav>
+        </div>
+      </article>`
+}
+const detail = (p, i) => {
   const subs = p.subprojects ?? []
   return `
-      <article class="project" id="${esc(p.slug)}">
-        <header>
-          ${mark(p)}
-          <div>
-            <h3>${esc(p.name)}</h3>
-            <p class="tagline">${esc(p.tagline)}</p>
-          </div>
-          ${p.status ? `<span class="status">${esc(p.status)}</span>` : ''}
-        </header>
-        <p class="desc">${esc(p.description)}</p>
-        <div class="more" id="more-${esc(p.slug)}"><div class="more-inner">
+        <div class="detail" data-i="${i}" id="detail-${esc(p.slug)}">
+          <h3>${esc(p.name)}</h3>
+          <p>${esc(p.description)}</p>
           ${p.highlights?.length ? `<ul class="highlights">${p.highlights.map(h => `<li>${esc(h)}</li>`).join('')}</ul>` : ''}
           ${p.stack?.length ? `<ul class="stack">${p.stack.map(s => `<li>${esc(s)}</li>`).join('')}</ul>` : ''}
           ${subs.length ? `<div class="subprojects"><h4>Sub-projects</h4>${subs.map(s => `<a class="subproject" href="${subHref(p, s)}"><div><strong>${esc(s.title)}</strong><span>${esc(s.summary)}</span></div><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div>` : ''}
-        </div></div>
-        <div class="card-actions">
-          <button class="more-toggle" type="button" aria-expanded="false" aria-controls="more-${esc(p.slug)}"><span>Show me more</span><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
-          <div class="fb" data-app="${esc(p.slug)}" data-name="${esc(p.name)}"${p.learnMore ? ` data-info="${esc(p.learnMore)}"` : ''}${demoLink(p) ? ` data-demo="${esc(demoLink(p))}"` : ''}></div>
-        </div>
-        <footer>
-          ${p.context ? `<span class="context">${esc(p.context)}</span>` : '<span></span>'}
-          <nav>${links.map(l => link(l)).join('')}</nav>
-        </footer>
-      </article>`
+          <div class="detail-foot">
+            ${p.context ? `<span class="context">${esc(p.context)}</span>` : '<span></span>'}
+            <div class="fb" data-app="${esc(p.slug)}" data-name="${esc(p.name)}"${p.learnMore ? ` data-info="${esc(p.learnMore)}"` : ''}${demoLink(p) ? ` data-demo="${esc(demoLink(p))}"` : ''}></div>
+          </div>
+        </div>`
 }
 
 // Content blocks a sub-project page can use. Numbers in tables keep their own formatting.
@@ -180,11 +188,13 @@ writeFileSync(join(stage, 'index.html'), fill('index.template.html', {
   ...common,
   TITLE: esc(site.title ?? profile.name ?? 'Portfolio'),
   ROLE: esc(profile.role),
+  ROLES: (profile.roles ?? [profile.role]).map(x => `<span>${esc(x)}</span>`).join(''),
   STATEMENT: esc(profile.statement),
   ABOUT: (profile.about ?? []).map(p => `<p>${esc(p)}</p>`).join('\n        '),
   PROFILE_LINKS: (profile.links ?? []).map(l => link(l, 'pill')).join(''),
   COUNT: String(projects.length),
   PROJECTS: projects.map(card).join(''),
+  DETAILS: projects.map(detail).join(''),
 }))
 
 for (const p of projects.filter(hasDemo)) {

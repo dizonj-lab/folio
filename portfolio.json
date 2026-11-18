@@ -5,7 +5,8 @@
   "profile": {
     "name": "Joselito Villanueva Dizon",
     "shortName": "Joselito Dizon",
-    "role": "AI Solution Architect",
+    "role": "Enterprise Architect · AI Systems Architect · Solution Architect",
+    "roles": ["Enterprise Architect", "AI Systems Architect", "Solution Architect"],
     "statement": "Making AI practical, personal, and meaningful in everyday life.",
     "about": [
       "Experienced technology architect passionate about AI and innovation. I design and build AI systems end to end — from the model and the data to the API, the interface and the server it runs on.",
